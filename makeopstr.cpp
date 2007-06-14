@@ -122,6 +122,8 @@ int main(int argc, char* argv[])
 				{
 					part[j++] = 0;
 					_strlwr(part);
+					if (part[strlen(part) - 1] == ')')
+						part[strlen(part) - 1] = 0;
 					if (operation)
 					{
 						if (!strcmp(part, "invalid"))
@@ -133,8 +135,8 @@ int main(int argc, char* argv[])
 					{
 						if ((!strcmp(part, "none")) || (!strcmp(part, "imm")) || (!strcmp(part, "mem")))
 							AddOperand("");
-						else if (!strncmp(part, "reg_", 4))
-							AddOperand(part + 4);
+						else if (!strncmp(part, "__x86_oper(reg_", 15))
+							AddOperand(part + 15);
 						else
 						{
 							printf("Error: Operand '%s' does not follow REG_* format\n", part);
@@ -152,6 +154,8 @@ int main(int argc, char* argv[])
 			{
 				part[j++] = 0;
 				_strlwr(part);
+				if (part[strlen(part) - 1] == ')')
+					part[strlen(part) - 1] = 0;
 				if (operation)
 				{
 					if (!strcmp(part, "invalid"))
@@ -163,7 +167,7 @@ int main(int argc, char* argv[])
 				{
 					if ((!strcmp(part, "none")) || (!strcmp(part, "imm")) || (!strcmp(part, "mem")))
 						AddOperand("");
-					else if (!strncmp(part, "reg_", 4))
+					else if (!strncmp(part, "__x86_oper(reg_", 15))
 						AddOperand(part + 4);
 					else
 					{

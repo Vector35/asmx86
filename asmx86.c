@@ -68,10 +68,11 @@ namespace x86
 		const uint8* opcodeStart;
 		const uint8* opcode;
 		uint64 addr;
-		size_t len;
+		size_t len, origLen;
 		uint8 opSize, finalOpSize, addrSize;
 		uint32 flags;
 		bool invalid;
+		bool insufficientLength;
 		bool opPrefix;
 		RepPrefix rep;
 		bool using64, rex;
@@ -378,14 +379,14 @@ namespace x86
 		{REG_TR0, ENC_REG_CR}, {INVALID, ENC_INVALID}, {REG_TR0, ENC_CR_REG}, {INVALID, ENC_INVALID}, // 0x24
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x28
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x2c
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x30
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x34
+		{WRMSR, ENC_NO_OPERANDS}, {RDTSC, ENC_NO_OPERANDS}, {RDMSR, ENC_NO_OPERANDS}, {RDPMC, ENC_NO_OPERANDS}, // 0x30
+		{SYSENTER, ENC_NO_OPERANDS}, {SYSEXIT, ENC_NO_OPERANDS}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x34
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x38
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x3c
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x40
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x44
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x48
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x4c
+		{CMOVO, ENC_REG_RM_V}, {CMOVNO, ENC_REG_RM_V}, {CMOVB, ENC_REG_RM_V}, {CMOVAE, ENC_REG_RM_V}, // 0x40
+		{CMOVE, ENC_REG_RM_V}, {CMOVNE, ENC_REG_RM_V}, {CMOVBE, ENC_REG_RM_V}, {CMOVA, ENC_REG_RM_V}, // 0x44
+		{CMOVS, ENC_REG_RM_V}, {CMOVNS, ENC_REG_RM_V}, {CMOVPE, ENC_REG_RM_V}, {CMOVPO, ENC_REG_RM_V}, // 0x48
+		{CMOVL, ENC_REG_RM_V}, {CMOVGE, ENC_REG_RM_V}, {CMOVLE, ENC_REG_RM_V}, {CMOVG, ENC_REG_RM_V}, // 0x4c
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x50
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x54
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x58
@@ -416,8 +417,8 @@ namespace x86
 		{BSF, ENC_REG_RM_V}, {BSR, ENC_REG_RM_V}, {MOVSX, ENC_MOVSXZX_8}, {MOVSX, ENC_MOVSXZX_16}, // 0xbc
 		{XADD, ENC_RM_REG_8}, {XADD, ENC_RM_REG_V}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xc0
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {CMPXCH8B, ENC_CMPXCH8B}, // 0xc4
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xc8
-		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xcc
+		{BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, // 0xc8
+		{BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, {BSWAP, ENC_OP_REG_V}, // 0xcc
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xd0
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xd4
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0xd8
@@ -477,7 +478,7 @@ namespace x86
 			{FSUB, ENC_ST0_FPUREG}, {FSUBR, ENC_ST0_FPUREG}, {FDIV, ENC_ST0_FPUREG}, {FDIVR, ENC_ST0_FPUREG} // 4
 		},
 		{ // 0xd9
-			{FLD, ENC_ST0_FPUREG}, {FXCH, ENC_ST0_FPUREG}, {12, ENC_REGGROUP_NO_OPERANDS}, {INVALID, ENC_INVALID}, // 0
+			{FLD, ENC_FPUREG}, {FXCH, ENC_ST0_FPUREG}, {12, ENC_REGGROUP_NO_OPERANDS}, {INVALID, ENC_INVALID}, // 0
 			{13, ENC_REGGROUP_NO_OPERANDS}, {14, ENC_REGGROUP_NO_OPERANDS}, {15, ENC_REGGROUP_NO_OPERANDS}, {16, ENC_REGGROUP_NO_OPERANDS} // 4
 		},
 		{ // 0xda
@@ -494,7 +495,7 @@ namespace x86
 		},
 		{ // 0xdd
 			{FFREE, ENC_FPUREG}, {INVALID, ENC_INVALID}, {FST, ENC_FPUREG}, {FSTP, ENC_FPUREG}, // 0
-			{FUCOM, ENC_FPUREG_ST0}, {FUCOMP, ENC_FPUREG}, {INVALID, ENC_INVALID}, {22, ENC_REGGROUP_NO_OPERANDS} // 4
+			{FUCOM, ENC_ST0_FPUREG}, {FUCOMP, ENC_ST0_FPUREG}, {INVALID, ENC_INVALID}, {22, ENC_REGGROUP_NO_OPERANDS} // 4
 		},
 		{ // 0xde
 			{FADDP, ENC_FPUREG_ST0}, {FMULP, ENC_FPUREG_ST0}, {INVALID, ENC_INVALID}, {19, ENC_REGGROUP_NO_OPERANDS}, // 0
@@ -659,6 +660,7 @@ namespace x86
 		{
 			// Read past end of buffer, returning 0xcc from now on will guarantee exit
 			state->invalid = true;
+			state->insufficientLength = true;
 			state->len = 0;
 			return 0xcc;
 		}
@@ -671,9 +673,19 @@ namespace x86
 
 	static uint8 __fastcall Peek8(DecodeState* restrict state)
 	{
-		uint8 result = Read8(state);
-		state->opcode--;
-		return result;
+		uint8 val;
+
+		if (state->len < 1)
+		{
+			// Read past end of buffer, returning 0xcc from now on will guarantee exit
+			state->invalid = true;
+			state->insufficientLength = true;
+			state->len = 0;
+			return 0xcc;
+		}
+
+		val = *state->opcode;
+		return val;
 	}
 
 
@@ -685,6 +697,7 @@ namespace x86
 		{
 			// Read past end of buffer
 			state->invalid = true;
+			state->insufficientLength = true;
 			state->len = 0;
 			return 0;
 		}
@@ -704,6 +717,7 @@ namespace x86
 		{
 			// Read past end of buffer
 			state->invalid = true;
+			state->insufficientLength = true;
 			state->len = 0;
 			return 0;
 		}
@@ -723,6 +737,7 @@ namespace x86
 		{
 			// Read past end of buffer
 			state->invalid = true;
+			state->insufficientLength = true;
 			state->len = 0;
 			return 0;
 		}
@@ -1685,6 +1700,7 @@ namespace x86
 			{
 				// Not a prefix, continue instruction processing
 				state->opcode--;
+				state->len++;
 				break;
 			}
 
@@ -1729,6 +1745,7 @@ namespace x86
 		state->result->flags = 0;
 		state->result->segment = SEG_DEFAULT;
 		state->invalid = false;
+		state->insufficientLength = false;
 		state->opPrefix = false;
 		state->rep = REP_PREFIX_NONE;
 		state->ripRelFixup = NULL;
@@ -1736,6 +1753,7 @@ namespace x86
 		state->rexReg = false;
 		state->rexRM1 = false;
 		state->rexRM2 = false;
+		state->origLen = state->len;
 	}
 
 
@@ -1744,6 +1762,8 @@ namespace x86
 		state->result->length = state->opcode - state->opcodeStart;
 		if (state->ripRelFixup)
 			*state->ripRelFixup += state->addr + state->result->length;
+		if (state->insufficientLength && (state->origLen < 15))
+			state->result->flags |= X86_FLAG_INSUFFICIENT_LENGTH;
 	}
 
 

@@ -111,7 +111,10 @@ namespace x86
 		__JUMPTARGET_JGE,
 		__JUMPTARGET_JLE,
 		__JUMPTARGET_JG,
-		__JUMPTARGET_ALWAYS
+		__JUMPTARGET_ALWAYS,
+		__JUMPTARGET_JCXZ,
+		__JUMPTARGET_JECXZ,
+		__JUMPTARGET_JRCXZ
 	};
 #ifndef __cplusplus
 	typedef enum __JumpTargetType __JumpTargetType;
@@ -123,7 +126,7 @@ namespace x86
 #define __IMM16_PARAM(n) int16 n
 #define __IMM32_PARAM(n) int32 n
 #define __IMM64_PARAM(n) int64 n
-#define __PTR_PARAM(n) void* n
+#define __PTR_PARAM(n) const void* n
 #define __TARGET_PARAM(n) JumpLabel* n
 
 #define __REG __REG_PARAM
@@ -167,7 +170,7 @@ namespace x86
 #endif
 
 #ifdef X86_CODEGEN_DEBUG
-#define __CONTEXT_PARAMS uint8* buf, void* (*translate)(void* buf, void* param), void* param, int wr, const char* loc, size_t locLen
+#define __CONTEXT_PARAMS uint8* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr, const char* loc, size_t locLen
 #define __CONTEXT buf, translate, param, wr, loc, locLen
 #define __EMIT_CONTEXT(buf) buf, 0, 0, 1, __CGX86_LOCATION
 #define __EMIT_CONTEXT_OFFSET(buf, n) (&(buf)[n]), 0, 0, 1, __CGX86_LOCATION
@@ -176,7 +179,7 @@ namespace x86
 #define __LENGTH_CONTEXT 0, 0, 0, 0, __CGX86_LOCATION
 #define __NO_ASSERT (void)loc; (void)locLen;
 #else
-#define __CONTEXT_PARAMS uint8* buf, void* (*translate)(void* buf, void* param), void* param, int wr
+#define __CONTEXT_PARAMS uint8* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr
 #define __CONTEXT buf, translate, param, wr
 #define __EMIT_CONTEXT(buf) buf, 0, 0, 1
 #define __EMIT_CONTEXT_OFFSET(buf, n) (&(buf)[n]), 0, 0, 1
@@ -348,9 +351,9 @@ namespace x86
 	// Executable pointer translation helpers
 #define __EXEC_OFFSET(n) __translate_to_exec(__CONTEXT_OFFSET(n))
 
-	static __inline void* __alwaysinline __translate_to_exec(__CONTEXT_PARAMS)
+	static __inline const void* __alwaysinline __translate_to_exec(__CONTEXT_PARAMS)
 	{
-		void* translatedPtr = buf;
+		const void* translatedPtr = buf;
 		__NO_ASSERT
 		(void)wr;
 		if (translate)
@@ -391,6 +394,23 @@ namespace x86
 		if (reg >= 8)
 		{
 			__WRITE_BUF_8_8(0, __REX(__REX_OPCODE(reg)), op + (reg & 7));
+			return 2;
+		}
+		else
+		{
+			__WRITE_BUF_8(0, op + reg);
+			return 1;
+		}
+	}
+
+	static __inline size_t __alwaysinline __onebyte64_opreg(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	{
+		__TRANSLATE_UNUSED
+		__NO_ASSERT
+		// Must use >= 8 here instead of & 8, see __reg8_64bit function
+		if (reg >= 8)
+		{
+			__WRITE_BUF_8_8(0, __REX(__REX_64 | __REX_OPCODE(reg)), op + (reg & 7));
 			return 2;
 		}
 		else
@@ -521,6 +541,31 @@ namespace x86
 		__WRITE_BUF_8_8(0, 0x66, op);
 		__WRITE_BUF_16(2, imm);
 		return 4;
+	}
+
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	{
+		__TRANSLATE_UNUSED
+		__NO_ASSERT
+		__WRITE_BUF_8_8(0, 0x66, op + reg);
+		return 2;
+	}
+
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	{
+		__TRANSLATE_UNUSED
+		__NO_ASSERT
+		if (reg >= 8)
+		{
+			__WRITE_BUF_8_8(0, 0x66, __REX(__REX_OPCODE(reg)));
+			__WRITE_BUF_8(2, op + (reg & 7));
+			return 3;
+		}
+		else
+		{
+			__WRITE_BUF_8_8(0, 0x66, op + reg);
+			return 2;
+		}
 	}
 
 	static __inline size_t __alwaysinline __onebyte_opreg_opsz_imm16_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int16 imm)
@@ -672,6 +717,9 @@ namespace x86
 #ifdef __onebyte_opreg_imm32
 #undef __onebyte_opreg_imm32
 #endif
+#ifdef __onebyte_opreg_opsz
+#undef __onebyte_opreg_opsz
+#endif
 #ifdef __onebyte_opreg_opsz_imm16
 #undef __onebyte_opreg_opsz_imm16
 #endif
@@ -685,6 +733,7 @@ namespace x86
 #define __onebyte_opreg __onebyte_opreg_32bit
 #define __onebyte_opreg_imm8 __onebyte_opreg_imm8_32bit
 #define __onebyte_opreg_imm32 __onebyte_opreg_imm32_32bit
+#define __onebyte_opreg_opsz __onebyte_opreg_opsz_32bit
 #define __onebyte_opreg_opsz_imm16 __onebyte_opreg_opsz_imm16_32bit
 #define __twobyte_opreg __twobyte_opreg_32bit
 #else
@@ -695,6 +744,7 @@ namespace x86
 #define __onebyte_opreg __onebyte_opreg_64bit
 #define __onebyte_opreg_imm8 __onebyte_opreg_imm8_64bit
 #define __onebyte_opreg_imm32 __onebyte_opreg_imm32_64bit
+#define __onebyte_opreg_opsz __onebyte_opreg_opsz_64bit
 #define __onebyte_opreg_opsz_imm16 __onebyte_opreg_opsz_imm16_64bit
 #define __twobyte_opreg __twobyte_opreg_64bit
 #endif
@@ -985,6 +1035,9 @@ namespace x86
 #ifdef __FORWARD_REF_COND_JUMP_SIZE
 #undef __FORWARD_REF_COND_JUMP_SIZE
 #endif
+#ifdef __FORWARD_REF_JCXZ_JUMP_SIZE
+#undef __FORWARD_REF_JCXZ_JUMP_SIZE
+#endif
 #ifdef __CODEGENX86_32BIT
 
 	#define X86_MARK_JUMP_LABEL_32(buf, n) __PREFIX32(mark_label) (buf, 0, 0, &(n)  __CGX86_LOCATION_PARAM)
@@ -993,20 +1046,65 @@ namespace x86
 	#define __FORWARD_REF_COND_JUMP_SIZE 6
 	#define __FORWARD_REF_NEAR_JUMP_SIZE 5
 	#define __FORWARD_REF_COND_NEAR_JUMP_SIZE 6
+	#define __FORWARD_REF_JCXZ_JUMP_SIZE 10
+	#define __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE 10
 
-	static __inline void __PREFIX(mark_label) (uint8* buf, void* (*translate)(void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __PREFIX(mark_label) (uint8* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
 	{
 		while (target->chain)
 		{
 			uint8* next = (uint8*)(size_t)*(uint32*)target->chain;
 			__JumpTargetType type = (__JumpTargetType)target->chain[4];
-			void* translatedPtr = target->chain;
+			const void* translatedPtr = target->chain;
 			if (translate)
 				translatedPtr = translate(target->chain, param);
 			if (type == __JUMPTARGET_ALWAYS)
 			{
 				target->chain[0] = 0xe9;
 				*((uint32*)&target->chain[1]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 5));
+			}
+			else if (type == __JUMPTARGET_JCXZ)
+			{
+				int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+				if ((diff >= -0x80) && (diff <= 0x7f))
+				{
+					target->chain[0] = 0x67;
+					target->chain[1] = 0xe3;
+					target->chain[2] = (uint8)diff;
+					target->chain[3] = 0xeb;
+					target->chain[4] = 5;
+				}
+				else
+				{
+					target->chain[0] = 0x67;
+					target->chain[1] = 0xe3;
+					target->chain[2] = 2;
+					target->chain[3] = 0xeb;
+					target->chain[4] = 5;
+					target->chain[5] = 0xe9;
+					*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+				}
+			}
+			else if (type == __JUMPTARGET_JECXZ)
+			{
+				int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+				if ((diff >= -0x80) && (diff <= 0x7f))
+				{
+					target->chain[0] = 0xe3;
+					target->chain[1] = (uint8)diff;
+					target->chain[2] = 0xeb;
+					target->chain[3] = 6;
+					target->chain[4] = 0xff;
+				}
+				else
+				{
+					target->chain[0] = 0xe3;
+					target->chain[1] = 2;
+					target->chain[2] = 0xeb;
+					target->chain[3] = 6;
+					target->chain[4] = 0xe9;
+					*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+				}
 			}
 			else
 			{
@@ -1024,6 +1122,11 @@ namespace x86
 		__NO_ASSERT
 		*(uint32*)ref = (uint32)(size_t)target->chain;
 		ref[4] = (uint8)type;
+		if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
+		{
+			*((uint32*)&ref[5]) = 0xcccccccc;
+			ref[9] = 0xcc;
+		}
 		target->chain = ref;
 	}
 
@@ -1035,12 +1138,14 @@ namespace x86
 	#define __FORWARD_REF_COND_JUMP_SIZE 16
 	#define __FORWARD_REF_NEAR_JUMP_SIZE 5
 	#define __FORWARD_REF_COND_NEAR_JUMP_SIZE 6
+	#define __FORWARD_REF_JCXZ_JUMP_SIZE 19
+	#define __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE 10
 
-	static __inline void __PREFIX(mark_label) (uint8* buf, void* (*translate)(void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __PREFIX(mark_label) (uint8* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
 	{
 		while (target->chain)
 		{
-			void* translatedPtr = target->chain;
+			const void* translatedPtr = target->chain;
 			uint8* next = 0;
 			if (translate)
 				translatedPtr = translate(target->chain, param);
@@ -1056,6 +1161,51 @@ namespace x86
 					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
 					target->chain[0] = 0xe9;
 					*((int32*)&target->chain[1]) = (int32)diff;
+				}
+				else if (type == __JUMPTARGET_JECXZ)
+				{
+					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
+					if ((diff >= -0x80) && (diff <= 0x7f))
+					{
+						target->chain[0] = 0x67;
+						target->chain[1] = 0xe3;
+						target->chain[2] = (uint8)diff;
+						target->chain[3] = 0xeb;
+						target->chain[4] = 5;
+					}
+					else
+					{
+						target->chain[0] = 0x67;
+						target->chain[1] = 0xe3;
+						target->chain[2] = 2;
+						target->chain[3] = 0xeb;
+						target->chain[4] = 5;
+						target->chain[5] = 0xe9;
+						*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+					}
+				}
+				else if (type == __JUMPTARGET_JRCXZ)
+				{
+					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
+					if ((diff >= -0x80) && (diff <= 0x7f))
+					{
+						target->chain[0] = 0xe3;
+						target->chain[1] = (uint8)diff;
+						target->chain[2] = 0xeb;
+						target->chain[3] = 6;
+						target->chain[4] = 0xff;
+					}
+					else
+					{
+						target->chain[0] = 0xe3;
+						target->chain[1] = 2;
+						target->chain[2] = 0xeb;
+						target->chain[3] = 6;
+						target->chain[4] = 0xe9;
+						*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+					}
 				}
 				else
 				{
@@ -1077,6 +1227,7 @@ namespace x86
 					{
 						target->chain[0] = 0xe9;
 						*((int32*)&target->chain[1]) = (int32)diff;
+						*((uint32*)&target->chain[5]) = 0xcccccccc;
 					}
 					else
 					{
@@ -1084,6 +1235,73 @@ namespace x86
 						target->chain[1] = 0x25;
 						*((int32*)&target->chain[2]) = 0;
 						*((uint64*)&target->chain[6]) = (uint64)(size_t)buf;
+					}
+				}
+				else if (type == __JUMPTARGET_JECXZ)
+				{
+					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+					if ((diff >= -0x80) && (diff <= 0x7f))
+					{
+						target->chain[0] = 0x67;
+						target->chain[1] = 0xe3;
+						target->chain[2] = (uint8)diff;
+						target->chain[3] = 0xeb;
+						target->chain[4] = 14;
+						*((uint32*)&target->chain[5]) = 0xcccccccc;
+					}
+					else if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
+					{
+						target->chain[0] = 0x67;
+						target->chain[1] = 0xe3;
+						target->chain[2] = 2;
+						target->chain[3] = 0xeb;
+						target->chain[4] = 14;
+						target->chain[5] = 0xe9;
+						*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+					}
+					else
+					{
+						target->chain[0] = 0x67;
+						target->chain[1] = 0xe3;
+						target->chain[2] = 2;
+						target->chain[3] = 0xeb;
+						target->chain[4] = 14;
+						target->chain[5] = 0xff;
+						target->chain[6] = 0x25;
+						*((int32*)&target->chain[7]) = 0;
+						*((uint64*)&target->chain[11]) = (uint64)(size_t)buf;
+					}
+				}
+				else if (type == __JUMPTARGET_JRCXZ)
+				{
+					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+					if ((diff >= -0x80) && (diff <= 0x7f))
+					{
+						target->chain[0] = 0xe3;
+						target->chain[1] = (uint8)diff;
+						target->chain[2] = 0xeb;
+						target->chain[3] = 15;
+						*((uint64*)&target->chain[4]) = 0xccccccccccccccccLL;
+					}
+					else if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
+					{
+						target->chain[0] = 0xe3;
+						target->chain[1] = 2;
+						target->chain[2] = 0xeb;
+						target->chain[3] = 15;
+						target->chain[4] = 0xe9;
+						*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+					}
+					else
+					{
+						target->chain[0] = 0xe3;
+						target->chain[1] = 2;
+						target->chain[2] = 0xeb;
+						target->chain[3] = 15;
+						target->chain[4] = 0xff;
+						target->chain[5] = 0x25;
+						*((int32*)&target->chain[6]) = 0;
+						*((uint64*)&target->chain[10]) = (uint64)(size_t)buf;
 					}
 				}
 				else
@@ -1096,6 +1314,7 @@ namespace x86
 						*((int32*)&target->chain[2]) = (int32)diff;
 						target->chain[6] = 0xeb;
 						target->chain[7] = 8;
+						*((uint16*)&target->chain[8]) = 0xcccc;
 					}
 					else
 					{
@@ -1121,6 +1340,11 @@ namespace x86
 			{
 				*(uint32*)ref = 0;
 				ref[4] = (uint8)type;
+				if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
+				{
+					*((uint32*)&ref[5]) = 0xcccccccc;
+					ref[9] = 0xcc;
+				}
 				target->chain = ref;
 			}
 			else
@@ -1129,6 +1353,11 @@ namespace x86
 				__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffff), "Near label out of range");
 				*(int32*)ref = (int32)diff;
 				ref[4] = (uint8)type;
+				if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
+				{
+					*((uint32*)&ref[5]) = 0xcccccccc;
+					ref[9] = 0xcc;
+				}
 				target->chain = ref;
 			}
 		}
@@ -1136,6 +1365,22 @@ namespace x86
 		{
 			*(uint64*)ref = (uint64)(size_t)target->chain;
 			ref[8] = (uint8)type;
+			if ((type == __JUMPTARGET_JECXZ) || (type == __JUMPTARGET_JRCXZ))
+			{
+				*((uint64*)&ref[9]) = 0xccccccccccccccccLL;
+				*((uint16*)&ref[17]) = 0xcccc;
+			}
+			else if (type == __JUMPTARGET_ALWAYS)
+			{
+				*((uint32*)&ref[9]) = 0xcccccccc;
+				ref[13] = 0xcc;
+			}
+			else
+			{
+				*((uint32*)&ref[9]) = 0xcccccccc;
+				*((uint16*)&ref[13]) = 0xcccc;
+				ref[15] = 0xcc;
+			}
 			target->chain = ref;
 		}
 	}
@@ -1808,7 +2053,7 @@ namespace x86
 #else
 		int64 diff;
 		if (!wr)
-			return 14;
+			return 16;
 		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(5)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
@@ -1893,7 +2138,7 @@ namespace x86
 			__WRITE_BUF_8(1, (int8)diff);
 			return 2;
 		}
-		diff = (int64)((size_t)a - ((size_t)buf + 6));
+		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(6)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8_8(0, 0x0f, 0x80 + cond);
@@ -1918,6 +2163,139 @@ namespace x86
 			__PREFIX(add_label_ref) (a, buf, (__JumpTargetType)cond  __CGX86_ASSERT_PARAMS);
 		return a->nearJump ? __FORWARD_REF_COND_NEAR_JUMP_SIZE : __FORWARD_REF_COND_JUMP_SIZE;
 	}
+
+#ifdef __CODEGENX86_32BIT
+	__DEF_INSTR_1(jcxz, p, __PTR)
+	{
+		int32 diff;
+		if (!wr)
+			return 10;
+		diff = (int32)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
+		if ((diff >= -0x80) && (diff <= 0x7f))
+		{
+			__WRITE_BUF_8_8(0, 0x67, 0xe3);
+			__WRITE_BUF_8(2, (int8)diff);
+			return 3;
+		}
+		else
+		{
+			__WRITE_BUF_8_8_8_8(0, 0x67, 0xe3, 2, 0xeb);
+			__WRITE_BUF_8_8(4, 5, 0xe9);
+			__WRITE_BUF_32(6, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(10))));
+			return 10;
+		}
+	}
+
+	__DEF_INSTR_1(jcxz, t, __TARGET)
+	{
+		if (a->addr != 0)
+			return __NAME(jcxz, p) (__CONTEXT, a->addr);
+		if (wr)
+			__PREFIX(add_label_ref) (a, buf, __JUMPTARGET_JCXZ  __CGX86_ASSERT_PARAMS);
+		return a->nearJump ? __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE : __FORWARD_REF_JCXZ_JUMP_SIZE;
+	}
+#endif
+
+	__DEF_INSTR_1(jecxz, p, __PTR)
+	{
+#ifdef __CODEGENX86_32BIT
+		int32 diff;
+		if (!wr)
+			return 9;
+		diff = (int32)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		if ((diff >= -0x80) && (diff <= 0x7f))
+		{
+			__WRITE_BUF_8(0, 0xe3);
+			__WRITE_BUF_8(1, (int8)diff);
+			return 2;
+		}
+		else
+		{
+			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 5);
+			__WRITE_BUF_8(4, 0xe9);
+			__WRITE_BUF_32(5, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(9))));
+			return 9;
+		}
+#else
+		int64 diff;
+		if (!wr)
+			return 19;
+		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
+		if ((diff >= -0x80) && (diff <= 0x7f))
+		{
+			__WRITE_BUF_8_8(0, 0x67, 0xe3);
+			__WRITE_BUF_8(2, (int8)diff);
+			return 3;
+		}
+		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(10)));
+		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
+		{
+			__WRITE_BUF_8_8_8_8(0, 0x67, 0xe3, 2, 0xeb);
+			__WRITE_BUF_8_8(4, 5, 0xe9);
+			__WRITE_BUF_32(6, (int32)diff);
+			return 10;
+		}
+		else
+		{
+			__WRITE_BUF_8_8_8_8(0, 0x67, 0xe3, 2, 0xeb);
+			__WRITE_BUF_8_8(4, 14, 0xff);
+			__WRITE_BUF_8(6, 0x25);
+			__WRITE_BUF_32(7, 0);
+			__WRITE_BUF_64(11, (uint64)(size_t)a);
+			return 19;
+		}
+#endif
+	}
+
+	__DEF_INSTR_1(jecxz, t, __TARGET)
+	{
+		if (a->addr != 0)
+			return __NAME(jecxz, p) (__CONTEXT, a->addr);
+		if (wr)
+			__PREFIX(add_label_ref) (a, buf, __JUMPTARGET_JECXZ  __CGX86_ASSERT_PARAMS);
+		return a->nearJump ? __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE : __FORWARD_REF_JCXZ_JUMP_SIZE;
+	}
+
+#ifdef __CODEGENX86_64BIT
+	__DEF_INSTR_1(jrcxz, p, __PTR)
+	{
+		int64 diff;
+		if (!wr)
+			return 18;
+		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		if ((diff >= -0x80) && (diff <= 0x7f))
+		{
+			__WRITE_BUF_8(0, 0xe3);
+			__WRITE_BUF_8(1, (int8)diff);
+			return 2;
+		}
+		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(9)));
+		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
+		{
+			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 5);
+			__WRITE_BUF_8(4, 0xe9);
+			__WRITE_BUF_32(5, (int32)diff);
+			return 9;
+		}
+		else
+		{
+			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 14);
+			__WRITE_BUF_8_8(4, 0xff, 0x25);
+			__WRITE_BUF_32(6, 0);
+			__WRITE_BUF_64(10, (uint64)(size_t)a);
+			return 18;
+		}
+	}
+
+	__DEF_INSTR_1(jrcxz, t, __TARGET)
+	{
+		if (a->addr != 0)
+			return __NAME(jrcxz, p) (__CONTEXT, a->addr);
+		if (wr)
+			__PREFIX(add_label_ref) (a, buf, __JUMPTARGET_JRCXZ  __CGX86_ASSERT_PARAMS);
+		return a->nearJump ? __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE : __FORWARD_REF_JCXZ_JUMP_SIZE;
+	}
+#endif
 
 #ifdef __CODEGENX86_32BIT
 	__DEF_INSTR_1(calln, r, __REG) { return __MODRM(reg_onebyte) (__CONTEXT, 0xff, 2, __reg32(a)); }
@@ -2294,9 +2672,9 @@ namespace x86
 	__DEF_INSTR_1(lock_dec_32, m, __MEM) { return __LOCKPREFIX(__MODRM(mem_onebyte) (__CONTEXT_OFFSET(1), 0xff, 1, __MEMOP(a), 0)); }
 #ifdef __CODEGENX86_32BIT
 	__DEF_INSTR_1(inc_16, r, __REG) { return __onebyte_opsz(__CONTEXT, 0x40 + __reg16(a)); }
-	__DEF_INSTR_1(inc_32, r, __REG) { return __onebyte(__CONTEXT, 0x40 + __reg16(a)); }
+	__DEF_INSTR_1(inc_32, r, __REG) { return __onebyte(__CONTEXT, 0x40 + __reg32(a)); }
 	__DEF_INSTR_1(dec_16, r, __REG) { return __onebyte_opsz(__CONTEXT, 0x48 + __reg16(a)); }
-	__DEF_INSTR_1(dec_32, r, __REG) { return __onebyte(__CONTEXT, 0x48 + __reg16(a)); }
+	__DEF_INSTR_1(dec_32, r, __REG) { return __onebyte(__CONTEXT, 0x48 + __reg32(a)); }
 #else
 	__DEF_INSTR_1(inc_16, r, __REG) { return __MODRM(reg_onebyte_opsz) (__CONTEXT, 0xff, 0, __reg16(a)); }
 	__DEF_INSTR_1(inc_32, r, __REG) { return __MODRM(reg_onebyte) (__CONTEXT, 0xff, 0, __reg32(a)); }
@@ -2554,9 +2932,9 @@ namespace x86
 	__DEF_INSTR_2(xchg_16, rr, __REG, __REG)
 	{
 		if (a == REG_AX)
-			return __onebyte_opsz(__CONTEXT, 0x90 + __reg16(b));
+			return __onebyte_opreg_opsz(__CONTEXT, 0x90, __reg16(b));
 		if (b == REG_AX)
-			return __onebyte_opsz(__CONTEXT, 0x90 + __reg16(a));
+			return __onebyte_opreg_opsz(__CONTEXT, 0x90, __reg16(a));
 		return __MODRM(reg_onebyte_opsz) (__CONTEXT, 0x87, __reg16(a), __reg16(b));
 	}
 
@@ -2572,9 +2950,9 @@ namespace x86
 		}
 #endif
 		if (a == REG_EAX)
-			return __onebyte(__CONTEXT, 0x90 + __reg32(b));
+			return __onebyte_opreg(__CONTEXT, 0x90, __reg32(b));
 		if (b == REG_EAX)
-			return __onebyte(__CONTEXT, 0x90 + __reg32(a));
+			return __onebyte_opreg(__CONTEXT, 0x90, __reg32(a));
 		return __MODRM(reg_onebyte) (__CONTEXT, 0x87, __reg32(a), __reg32(b));
 	}
 
@@ -2582,9 +2960,9 @@ namespace x86
 	__DEF_INSTR_2(xchg_64, rr, __REG, __REG)
 	{
 		if (a == REG_RAX)
-			return __onebyte64(__CONTEXT, 0x90 + __reg64(b));
+			return __onebyte64_opreg(__CONTEXT, 0x90, __reg64(b));
 		if (b == REG_RAX)
-			return __onebyte64(__CONTEXT, 0x90 + __reg64(a));
+			return __onebyte64_opreg(__CONTEXT, 0x90, __reg64(a));
 		return __MODRM(reg_onebyte64) (__CONTEXT, 0x87, __reg64(a), __reg64(b));
 	}
 #endif
@@ -2614,18 +2992,18 @@ namespace x86
 	__DEF_INSTR_2(cmpxchg_8, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xb0, __reg8(b), __reg8(a)); }
 	__DEF_INSTR_2(cmpxchg_8, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xb0, __reg8(b), __MEMOP(a), 0); }
 	__DEF_INSTR_2(lock_cmpxchg_8, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xb0, __reg8(b), __MEMOP(a), 0)); }
-	__DEF_INSTR_2(cmpxchg_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xb1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(cmpxchg_16, mr, __MEM, __REG) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xb1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_cmpxchg_16, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte_opsz) (__CONTEXT_OFFSET(1), 0xb1, __reg8(b), __MEMOP(a), 0)); }
-	__DEF_INSTR_2(cmpxchg_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xb1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(cmpxchg_32, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xb1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_cmpxchg_32, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xb1, __reg8(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(cmpxchg_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xb1, __reg16(b), __reg16(a)); }
+	__DEF_INSTR_2(cmpxchg_16, mr, __MEM, __REG) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xb1, __reg16(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_cmpxchg_16, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte_opsz) (__CONTEXT_OFFSET(1), 0xb1, __reg16(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(cmpxchg_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xb1, __reg32(b), __reg32(a)); }
+	__DEF_INSTR_2(cmpxchg_32, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xb1, __reg32(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_cmpxchg_32, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xb1, __reg32(b), __MEMOP(a), 0)); }
 	__DEF_INSTR_1(cmpxchg8b, m, __MEM) { return __MODRM(mem_twobyte) (__CONTEXT, 0xc7, 1, __MEMOP(a), 0); }
 	__DEF_INSTR_1(lock_cmpxchg8b, m, __MEM) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xc7, 1, __MEMOP(a), 0)); }
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2(cmpxchg_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xb1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(cmpxchg_64, mr, __MEM, __REG) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xb1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_cmpxchg_64, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xb1, __reg8(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(cmpxchg_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xb1, __reg64(b), __reg64(a)); }
+	__DEF_INSTR_2(cmpxchg_64, mr, __MEM, __REG) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xb1, __reg64(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_cmpxchg_64, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xb1, __reg64(b), __MEMOP(a), 0)); }
 	__DEF_INSTR_1(cmpxchg16b, m, __MEM) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xc7, 1, __MEMOP(a), 0); }
 	__DEF_INSTR_1(lock_cmpxchg16b, m, __MEM) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xc7, 1, __MEMOP(a), 0)); }
 #endif
@@ -2635,16 +3013,16 @@ namespace x86
 	__DEF_INSTR_2(xadd_8, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xc0, __reg8(b), __reg8(a)); }
 	__DEF_INSTR_2(xadd_8, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xc0, __reg8(b), __MEMOP(a), 0); }
 	__DEF_INSTR_2(lock_xadd_8, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xc0, __reg8(b), __MEMOP(a), 0)); }
-	__DEF_INSTR_2(xadd_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xc1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(xadd_16, mr, __MEM, __REG) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xc1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_xadd_16, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte_opsz) (__CONTEXT_OFFSET(1), 0xc1, __reg8(b), __MEMOP(a), 0)); }
-	__DEF_INSTR_2(xadd_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xc1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(xadd_32, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xc1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_xadd_32, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xc1, __reg8(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(xadd_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xc1, __reg16(b), __reg16(a)); }
+	__DEF_INSTR_2(xadd_16, mr, __MEM, __REG) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xc1, __reg16(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_xadd_16, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte_opsz) (__CONTEXT_OFFSET(1), 0xc1, __reg16(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(xadd_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xc1, __reg32(b), __reg32(a)); }
+	__DEF_INSTR_2(xadd_32, mr, __MEM, __REG) { return __MODRM(mem_twobyte) (__CONTEXT, 0xc1, __reg32(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_xadd_32, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xc1, __reg32(b), __MEMOP(a), 0)); }
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2(xadd_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xc1, __reg8(b), __reg8(a)); }
-	__DEF_INSTR_2(xadd_64, mr, __MEM, __REG) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xc1, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2(lock_xadd_64, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xc1, __reg8(b), __MEMOP(a), 0)); }
+	__DEF_INSTR_2(xadd_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xc1, __reg64(b), __reg64(a)); }
+	__DEF_INSTR_2(xadd_64, mr, __MEM, __REG) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xc1, __reg64(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2(lock_xadd_64, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xc1, __reg64(b), __MEMOP(a), 0)); }
 #endif
 
 
@@ -2790,6 +3168,14 @@ namespace x86
 	__DEF_INSTR_2(btc_32, mi, __MEM, __IMM8) { return __MODRM(mem_twobyte_imm8) (__CONTEXT, 0xba, 7, __MEMOP(a), b); }
 	__DEF_INSTR_2(lock_btc_32, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte) (__CONTEXT_OFFSET(1), 0xbb, __reg32(b), __MEMOP(a), 0)); }
 	__DEF_INSTR_2(lock_btc_32, mi, __MEM, __IMM8) { return __LOCKPREFIX(__MODRM(mem_twobyte_imm8) (__CONTEXT_OFFSET(1), 0xba, 7, __MEMOP(a), b)); }
+	__DEF_INSTR_2(bsf_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xbc, __reg16(a), __reg16(b)); }
+	__DEF_INSTR_2(bsf_16, rm, __REG, __MEM) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xbc, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(bsf_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xbc, __reg32(a), __reg32(b)); }
+	__DEF_INSTR_2(bsf_32, rm, __REG, __MEM) { return __MODRM(mem_twobyte) (__CONTEXT, 0xbc, __reg32(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(bsr_16, rr, __REG, __REG) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0xbd, __reg16(a), __reg16(b)); }
+	__DEF_INSTR_2(bsr_16, rm, __REG, __MEM) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0xbd, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(bsr_32, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0xbd, __reg32(a), __reg32(b)); }
+	__DEF_INSTR_2(bsr_32, rm, __REG, __MEM) { return __MODRM(mem_twobyte) (__CONTEXT, 0xbd, __reg32(a), __MEMOP(b), 0); }
 #ifdef __CODEGENX86_64BIT
 	__DEF_INSTR_2(bt_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xa3, __reg64(b), __reg64(a)); }
 	__DEF_INSTR_2(bt_64, mr, __MEM, __REG) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xa3, __reg64(b), __MEMOP(a), 0); }
@@ -2813,6 +3199,10 @@ namespace x86
 	__DEF_INSTR_2(btc_64, mi, __MEM, __IMM8) { return __MODRM(mem_twobyte64_imm8) (__CONTEXT, 0xba, 7, __MEMOP(a), b); }
 	__DEF_INSTR_2(lock_btc_64, mr, __MEM, __REG) { return __LOCKPREFIX(__MODRM(mem_twobyte64) (__CONTEXT_OFFSET(1), 0xbb, __reg64(b), __MEMOP(a), 0)); }
 	__DEF_INSTR_2(lock_btc_64, mi, __MEM, __IMM8) { return __LOCKPREFIX(__MODRM(mem_twobyte64_imm8) (__CONTEXT_OFFSET(1), 0xba, 7, __MEMOP(a), b)); }
+	__DEF_INSTR_2(bsf_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xbc, __reg64(a), __reg64(b)); }
+	__DEF_INSTR_2(bsf_64, rm, __REG, __MEM) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xbc, __reg64(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(bsr_64, rr, __REG, __REG) { return __MODRM(reg_twobyte64) (__CONTEXT, 0xbd, __reg64(a), __reg64(b)); }
+	__DEF_INSTR_2(bsr_64, rm, __REG, __MEM) { return __MODRM(mem_twobyte64) (__CONTEXT, 0xbd, __reg64(a), __MEMOP(b), 0); }
 #endif
 
 
@@ -3054,6 +3444,7 @@ namespace x86
 	__ONEBYTE_INSTR(sti, 0xfb)
 	__ONEBYTE_INSTR(cld, 0xfc)
 	__ONEBYTE_INSTR(std, 0xfd)
+	__TWOBYTE_INSTR(ud2, 0x0b);
 	__TWOBYTE_INSTR(cpuid, 0xa2);
 
 
