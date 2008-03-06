@@ -1978,7 +1978,8 @@ namespace x86
 									WriteOperand(&out, &outMaxLen, instr->operands[i].components[1], instr->operands[i].scale, plus);
 									plus = true;
 								}
-								if (instr->operands[i].immediate != 0)
+								if ((instr->operands[i].immediate != 0) || ((instr->operands[i].components[0] == NONE) &&
+									(instr->operands[i].components[1] == NONE)))
 								{
 									if (plus && ((int64)instr->operands[i].immediate >= -0x80) &&
 										((int64)instr->operands[i].immediate < 0))
