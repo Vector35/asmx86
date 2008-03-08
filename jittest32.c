@@ -36,7 +36,7 @@
 
 int main()
 {
-	uint8* code = (uint8*)mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	uint8* code = (uint8*)mmap(NULL, 4096, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0);
 	uint8* codeptr = code;
 
 	EMIT_R(codeptr, push, REG_EBP);

@@ -21,7 +21,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef __cplusplus
-namespace x86
+namespace asmx86
 {
 #endif
 
