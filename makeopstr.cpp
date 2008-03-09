@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 					if ((!strcmp(part, "none")) || (!strcmp(part, "imm")) || (!strcmp(part, "mem")))
 						AddOperand("");
 					else if (!strncmp(part, "__x86_oper(reg_", 15))
-						AddOperand(part + 4);
+						AddOperand(part + 15);
 					else
 					{
 						printf("Error: Operand '%s' does not follow REG_* format\n", part);
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	fprintf(fp, "static const char* const operationString = \"");
+	fprintf(fp, "static const char operationString[] = \"");
 	for (size_t i = 0; i < str.size(); i++)
 	{
 		if (str[i] == 0)
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 
 	ComputeString(operands, str, offset);
 
-	fprintf(fp, "static const char* const operandString = \"");
+	fprintf(fp, "static const char operandString[] = \"");
 	for (size_t i = 0; i < str.size(); i++)
 	{
 		if (str[i] == 0)
