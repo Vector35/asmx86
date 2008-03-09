@@ -2348,8 +2348,8 @@ namespace asmx86
 	// Conditional move instructions
 	__DEF_INSTR_2_ARG(condmov_16, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __reg16(b)); }
 	__DEF_INSTR_2_ARG(condmov_16, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(condmov_32, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x40 + cond, __reg16(a), __reg16(b)); }
-	__DEF_INSTR_2_ARG(condmov_32, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x40 + cond, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(condmov_32, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __reg32(b)); }
+	__DEF_INSTR_2_ARG(condmov_32, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __MEMOP(b), 0); }
 
 #define __CONDMOV_INSTR(n, cond) \
 	__DEF_INSTR_2(n ## _16, rr, __REG, __REG) { return __NAME(condmov_16, rr) (__CONTEXT, cond, a, b); } \
@@ -2389,8 +2389,8 @@ namespace asmx86
 	__CONDMOV_INSTR(cmovnle, 15)
 
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2_ARG(condmov_64, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte64) (__CONTEXT, 0x40 + cond, __reg16(a), __reg16(b)); }
-	__DEF_INSTR_2_ARG(condmov_64, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte64) (__CONTEXT, 0x40 + cond, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(condmov_64, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __reg64(b)); }
+	__DEF_INSTR_2_ARG(condmov_64, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __MEMOP(b), 0); }
 
 #define __CONDMOV_INSTR_64(n, cond) \
 	__DEF_INSTR_2(n ## _64, rr, __REG, __REG) { return __NAME(condmov_64, rr) (__CONTEXT, cond, a, b); } \
