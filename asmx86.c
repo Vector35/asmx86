@@ -35,6 +35,7 @@
 #define DEC_FLAG_BYTE					0x0100
 #define DEC_FLAG_FLIP_OPERANDS			0x0200
 #define DEC_FLAG_IMM_SX					0x0400
+#define DEC_FLAG_INC_OPERATION_FOR_64		0x0800
 #define DEC_FLAG_OPERATION_OP_SIZE		0x1000
 #define DEC_FLAG_FORCE_16BIT			0x2000
 #define DEC_FLAG_INVALID_IN_64BIT		0x4000
@@ -89,8 +90,6 @@ namespace x86
 
 	static void __fastcall InvalidDecode(DecodeState* restrict state);
 	static void __fastcall DecodeTwoByte(DecodeState* restrict state);
-	static void __fastcall DecodeThreeByte0F38(DecodeState* restrict state);
-	static void __fastcall DecodeThreeByte0F3A(DecodeState* restrict state);
 	static void __fastcall DecodeFpu(DecodeState* restrict state);
 	static void __fastcall DecodeNoOperands(DecodeState* restrict state);
 	static void __fastcall DecodeRegRM(DecodeState* restrict state);
@@ -134,6 +133,7 @@ namespace x86
 	static void __fastcall Decode3DNow(DecodeState* restrict state);
 	static void __fastcall DecodeSSETable(DecodeState* restrict state);
 	static void __fastcall DecodeSSETableImm8(DecodeState* restrict state);
+	static void __fastcall DecodeSSETableMem8(DecodeState* restrict state);
 	static void __fastcall DecodeSSE(DecodeState* restrict state);
 	static void __fastcall DecodeSSESingle(DecodeState* restrict state);
 	static void __fastcall DecodeSSEPacked(DecodeState* restrict state);
@@ -156,12 +156,13 @@ namespace x86
 	static void __fastcall DecodeRegGroupAX(DecodeState* restrict state);
 	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state);
 	static void __fastcall DecodeMovNti(DecodeState* restrict state);
+	static void __fastcall DecodeCrc32(DecodeState* restrict state);
 
 
 	enum EncodingType
 	{
 		ENC_INVALID = 0,
-		ENC_TWO_BYTE, ENC_THREE_BYTE_0F38, ENC_THREE_BYTE_0F3A, ENC_FPU,
+		ENC_TWO_BYTE, ENC_FPU,
 		ENC_NO_OPERANDS, ENC_OP_SIZE, ENC_OP_SIZE_DEF64, ENC_OP_SIZE_NO64,
 		ENC_REG_RM_8, ENC_RM_REG_8, ENC_RM_REG_8_LOCK,
 		ENC_RM_REG_16,
@@ -202,6 +203,8 @@ namespace x86
 		ENC_EAX_DX_8, ENC_EAX_DX_V, ENC_DX_EAX_8, ENC_DX_EAX_V,
 		ENC_3DNOW,
 		ENC_SSE_TABLE, ENC_SSE_TABLE_FLIP, ENC_SSE_TABLE_IMM_8, ENC_SSE_TABLE_IMM_8_FLIP,
+		ENC_SSE_TABLE_INCOP64, ENC_SSE_TABLE_INCOP64_FLIP,
+		ENC_SSE_TABLE_MEM8, ENC_SSE_TABLE_MEM8_FLIP,
 		ENC_SSE, ENC_SSE_SINGLE, ENC_SSE_PACKED, ENC_MMX, ENC_MMX_SSEONLY,
 		ENC_MMX_GROUP, ENC_PINSRW,
 		ENC_REG_CR, ENC_CR_REG,
@@ -211,6 +214,7 @@ namespace x86
 		ENC_FPUREG, ENC_ST0_FPUREG, ENC_FPUREG_ST0,
 		ENC_REGGROUP_NO_OPERANDS, ENC_REGGROUP_AX,
 		ENC_CMPXCH8B, ENC_MOVNTI,
+		ENC_CRC32_8, ENC_CRC32_V,
 		ENC_COUNT
 	};
 #ifndef __cplusplus
@@ -231,7 +235,7 @@ namespace x86
 	static const DecodeDef decoders[ENC_COUNT] =
 	{
 		{InvalidDecode, 0},
-		{DecodeTwoByte, 0}, {DecodeThreeByte0F38, 0}, {DecodeThreeByte0F3A, 0}, {DecodeFpu, 0},
+		{DecodeTwoByte, 0}, {DecodeFpu, 0},
 		{DecodeNoOperands, 0}, {DecodeNoOperands, DEC_FLAG_OPERATION_OP_SIZE},
 		{DecodeNoOperands, DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_OPERATION_OP_SIZE},
 		{DecodeNoOperands, DEC_FLAG_INVALID_IN_64BIT | DEC_FLAG_OPERATION_OP_SIZE},
@@ -283,6 +287,8 @@ namespace x86
 		{DecodeEaxDx, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS}, {DecodeEaxDx, DEC_FLAG_FLIP_OPERANDS},
 		{Decode3DNow, 0},
 		{DecodeSSETable, 0}, {DecodeSSETable, DEC_FLAG_FLIP_OPERANDS}, {DecodeSSETableImm8, 0}, {DecodeSSETableImm8, DEC_FLAG_FLIP_OPERANDS},
+		{DecodeSSETable, DEC_FLAG_INC_OPERATION_FOR_64}, {DecodeSSETable, DEC_FLAG_INC_OPERATION_FOR_64 | DEC_FLAG_FLIP_OPERANDS},
+		{DecodeSSETableMem8, 0}, {DecodeSSETableMem8, DEC_FLAG_FLIP_OPERANDS},
 		{DecodeSSE, 0}, {DecodeSSESingle, 0}, {DecodeSSEPacked, 0}, {DecodeMMX, 0}, {DecodeMMXSSEOnly, 0},
 		{DecodeMMXGroup, 0}, {DecodePinsrw, 0},
 		{DecodeRegCR, DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_LOCK},
@@ -292,7 +298,8 @@ namespace x86
 		{DecodeMemFloatEnv, 0}, {DecodeMemFloatSave, 0},
 		{DecodeFPUReg, 0}, {DecodeFPURegST0, DEC_FLAG_FLIP_OPERANDS}, {DecodeFPURegST0, 0},
 		{DecodeRegGroupNoOperands, 0}, {DecodeRegGroupAX, 0},
-		{DecodeCmpXch8B, 0}, {DecodeMovNti, 0}
+		{DecodeCmpXch8B, 0}, {DecodeMovNti, 0},
+		{DecodeCrc32, DEC_FLAG_BYTE}, {DecodeCrc32, 0}
 	};
 
 
@@ -400,7 +407,7 @@ namespace x86
 		{10, ENC_SSE_TABLE}, {11, ENC_SSE_TABLE}, {12, ENC_SSE_TABLE}, {13, ENC_SSE_TABLE}, // 0x2c
 		{WRMSR, ENC_NO_OPERANDS}, {RDTSC, ENC_NO_OPERANDS}, {RDMSR, ENC_NO_OPERANDS}, {RDPMC, ENC_NO_OPERANDS}, // 0x30
 		{SYSENTER, ENC_NO_OPERANDS}, {SYSEXIT, ENC_NO_OPERANDS}, {INVALID, ENC_INVALID}, {GETSEC, ENC_NO_OPERANDS}, // 0x34
-		{0, ENC_THREE_BYTE_0F38}, {INVALID, ENC_INVALID}, {0, ENC_THREE_BYTE_0F3A}, {INVALID, ENC_INVALID}, // 0x38
+		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x38
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x3c
 		{CMOVO, ENC_REG_RM_V}, {CMOVNO, ENC_REG_RM_V}, {CMOVB, ENC_REG_RM_V}, {CMOVAE, ENC_REG_RM_V}, // 0x40
 		{CMOVE, ENC_REG_RM_V}, {CMOVNE, ENC_REG_RM_V}, {CMOVBE, ENC_REG_RM_V}, {CMOVA, ENC_REG_RM_V}, // 0x44
@@ -413,11 +420,11 @@ namespace x86
 		{17, ENC_SSE_TABLE}, {18, ENC_SSE_TABLE}, {19, ENC_SSE_TABLE}, {PACKSSWB, ENC_MMX}, // 0x60
 		{PCMPGTB, ENC_MMX}, {PCMPGTW, ENC_MMX}, {PCMPGTD, ENC_MMX}, {PACKUSWB, ENC_MMX}, // 0x64
 		{PUNPCKHBW, ENC_MMX}, {PUNPCKHWD, ENC_MMX}, {PUNPCKHDQ, ENC_MMX}, {PACKSSDW, ENC_MMX}, // 0x68
-		{PUNPCKLQDQ, ENC_MMX_SSEONLY}, {PUNPCKHQDQ, ENC_MMX_SSEONLY}, {20, ENC_SSE_TABLE}, {21, ENC_SSE_TABLE}, // 0x6c
+		{PUNPCKLQDQ, ENC_MMX_SSEONLY}, {PUNPCKHQDQ, ENC_MMX_SSEONLY}, {20, ENC_SSE_TABLE_INCOP64}, {21, ENC_SSE_TABLE}, // 0x6c
 		{22, ENC_SSE_TABLE_IMM_8}, {0, ENC_MMX_GROUP}, {1, ENC_MMX_GROUP}, {2, ENC_MMX_GROUP}, // 0x70
 		{PCMPEQB, ENC_MMX}, {PCMPEQW, ENC_MMX}, {PCMPEQD, ENC_MMX}, {EMMS, ENC_NO_OPERANDS}, // 0x74
 		{VMREAD, ENC_RM_REG_DEF64}, {VMWRITE, ENC_RM_REG_DEF64}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x78
-		{23, ENC_SSE_TABLE}, {24, ENC_SSE_TABLE}, {25, ENC_SSE_TABLE_FLIP}, {21, ENC_SSE_TABLE_FLIP}, // 0x7c
+		{23, ENC_SSE_TABLE}, {24, ENC_SSE_TABLE}, {25, ENC_SSE_TABLE_INCOP64_FLIP}, {21, ENC_SSE_TABLE_FLIP}, // 0x7c
 		{JO, ENC_RELIMM_V_DEF64}, {JNO, ENC_RELIMM_V_DEF64}, {JB, ENC_RELIMM_V_DEF64}, {JAE, ENC_RELIMM_V_DEF64}, // 0x80
 		{JE, ENC_RELIMM_V_DEF64}, {JNE, ENC_RELIMM_V_DEF64}, {JBE, ENC_RELIMM_V_DEF64}, {JA, ENC_RELIMM_V_DEF64}, // 0x84
 		{JS, ENC_RELIMM_V_DEF64}, {JNS, ENC_RELIMM_V_DEF64}, {JPE, ENC_RELIMM_V_DEF64}, {JPO, ENC_RELIMM_V_DEF64}, // 0x88
@@ -455,13 +462,31 @@ namespace x86
 
 	static const SparseInstructionEncoding threeByte0F38Map[] =
 	{
-		{0, {INVALID, ENC_INVALID}}
+		{0x00, {PSHUFB, ENC_MMX}}, {0x01, {PHADDW, ENC_MMX}}, {0x02, {PHADDD, ENC_MMX}}, {0x03, {PHADDSW, ENC_MMX}},
+		{0x04, {PMADDUBSW, ENC_MMX}}, {0x05, {PHSUBW, ENC_MMX}}, {0x06, {PHSUBD, ENC_MMX}}, {0x07, {PHSUBSW, ENC_MMX}},
+		{0x08, {PSIGNB, ENC_MMX}}, {0x09, {PSIGNW, ENC_MMX}}, {0x0a, {PSIGND, ENC_MMX}}, {0x0b, {PMULHRSW, ENC_MMX}},
+		{0x10, {PBLENDVB, ENC_MMX_SSEONLY}}, {0x14, {BLENDVPS, ENC_MMX_SSEONLY}}, {0x15, {BLENDVPD, ENC_MMX_SSEONLY}},
+		{0x17, {PTEST, ENC_MMX_SSEONLY}}, {0x1c, {PABSB, ENC_MMX}}, {0x1d, {PABSW, ENC_MMX}}, {0x1e, {PABSD, ENC_MMX}},
+		{0x20, {37, ENC_SSE_TABLE}}, {0x21, {38, ENC_SSE_TABLE}}, {0x22, {39, ENC_SSE_TABLE}}, {0x23, {40, ENC_SSE_TABLE}},
+		{0x24, {41, ENC_SSE_TABLE}}, {0x25, {42, ENC_SSE_TABLE}}, {0x28, {PMULDQ, ENC_MMX_SSEONLY}}, {0x29, {PCMPEQQ, ENC_MMX_SSEONLY}},
+		{0x2a, {43, ENC_SSE_TABLE}}, {0x2b, {PACKUSDW, ENC_MMX_SSEONLY}}, {0x30, {44, ENC_SSE_TABLE}}, {0x31, {45, ENC_SSE_TABLE}},
+		{0x32, {46, ENC_SSE_TABLE}}, {0x33, {47, ENC_SSE_TABLE}}, {0x34, {48, ENC_SSE_TABLE}}, {0x35, {49, ENC_SSE_TABLE}},
+		{0x37, {PCMPGTQ, ENC_MMX_SSEONLY}}, {0x38, {PMINSB, ENC_MMX_SSEONLY}}, {0x39, {PMINSD, ENC_MMX_SSEONLY}},
+		{0x3a, {PMINUW, ENC_MMX_SSEONLY}}, {0x3b, {PMINUD, ENC_MMX_SSEONLY}}, {0x3c, {PMAXSB, ENC_MMX_SSEONLY}},
+		{0x3d, {PMAXSD, ENC_MMX_SSEONLY}}, {0x3e, {PMAXUW, ENC_MMX_SSEONLY}}, {0x3f, {PMAXUD, ENC_MMX_SSEONLY}},
+		{0x40, {PMULLD, ENC_MMX_SSEONLY}}, {0x41, {PHMINPOSUW, ENC_MMX_SSEONLY}}, {0xf0, {CRC32, ENC_CRC32_8}}, {0xf1, {CRC32, ENC_CRC32_V}}
 	};
 
 
 	static const SparseInstructionEncoding threeByte0F3AMap[] =
 	{
-		{0, {INVALID, ENC_INVALID}}
+		{0x08, {ROUNDPS, ENC_MMX_SSEONLY}}, {0x09, {ROUNDPD, ENC_MMX_SSEONLY}}, {0x0a, {50, ENC_SSE_TABLE}}, {0x0b, {51, ENC_SSE_TABLE}},
+		{0x0c, {BLENDPS, ENC_MMX_SSEONLY}}, {0x0d, {BLENDPD, ENC_MMX_SSEONLY}}, {0x0e, {PBLENDW, ENC_MMX_SSEONLY}}, {0x0f, {PALIGNR, ENC_MMX}},
+		{0x14, {52, ENC_SSE_TABLE_MEM8_FLIP}}, {0x15, {53, ENC_SSE_TABLE_FLIP}}, {0x16, {54, ENC_SSE_TABLE_INCOP64_FLIP}},
+		{0x17, {55, ENC_SSE_TABLE_FLIP}}, {0x20, {56, ENC_SSE_TABLE_MEM8}}, {0x21, {57, ENC_SSE_TABLE}}, {0x22, {58, ENC_SSE_TABLE_INCOP64}},
+		{0x40, {DPPS, ENC_MMX_SSEONLY}}, {0x41, {DPPD, ENC_MMX_SSEONLY}}, {0x42, {MPSADBW, ENC_MMX_SSEONLY}},
+		{0x60, {PCMPESTRM, ENC_MMX_SSEONLY}}, {0x61, {PCMPESTRI, ENC_MMX_SSEONLY}}, {0x62, {PCMPISTRM, ENC_MMX_SSEONLY}},
+		{0x63, {PCMPISTRI, ENC_MMX_SSEONLY}}
 	};
 
 
@@ -570,6 +595,19 @@ namespace x86
 	};
 
 
+	static const uint16 group0F01RegOperations[8][8] =
+	{
+		{INVALID, VMCALL, VMLAUNCH, VMRESUME, VMXOFF, INVALID, INVALID, INVALID},
+		{MONITOR, MWAIT, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{XGETBV, XSETBV, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
+		{SWAPGS, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID}
+	};
+
+
 	static const uint16 mmxGroupOperations[3][8][2] =
 	{
 		{ // Group 0
@@ -589,12 +627,12 @@ namespace x86
 
 	enum SSETableOperandType
 	{
+		SSE_16,
 		SSE_32,
 		SSE_64,
 		SSE_128,
 		SSE_128_FLIP,
 		GPR_32_OR_64,
-		GPR_32_OR_64_INCOP,
 		MMX_32,
 		MMX_64
 	};
@@ -703,8 +741,8 @@ namespace x86
 			{{PUNPCKLDQ, MMX_64, MMX_32}, {PUNPCKLDQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}}
 		},
 		{ // Entry 20
-			{{MOVD, MMX_64, GPR_32_OR_64_INCOP}, {MOVD, SSE_128, GPR_32_OR_64_INCOP}, {INVALID, 0, 0}, {INVALID, 0, 0}},
-			{{MOVD, MMX_64, GPR_32_OR_64_INCOP}, {MOVD, SSE_128, GPR_32_OR_64_INCOP}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
 		},
 		{ // Entry 21
 			{{MOVQ, MMX_64, MMX_64}, {MOVDQA, SSE_128, SSE_128}, {INVALID, 0, 0}, {MOVDQU, SSE_128, SSE_128}},
@@ -723,8 +761,8 @@ namespace x86
 			{{INVALID, 0, 0}, {HSUBPD, SSE_128, SSE_128}, {HSUBPS, SSE_128, SSE_128}, {INVALID, 0, 0}}
 		},
 		{ // Entry 25
-			{{MOVD, MMX_64, GPR_32_OR_64_INCOP}, {MOVD, SSE_128, GPR_32_OR_64_INCOP}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}},
-			{{MOVD, MMX_64, GPR_32_OR_64_INCOP}, {MOVD, SSE_128, GPR_32_OR_64_INCOP}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}}
+			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}},
+			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}}
 		},
 		{ // Entry 26
 			{{CMPPS, SSE_128, SSE_128}, {CMPPD, SSE_128, SSE_128}, {CMPSD, SSE_128, SSE_128}, {CMPSS, SSE_128, SSE_128}},
@@ -769,6 +807,94 @@ namespace x86
 		{ // Entry 36
 			{{MASKMOVQ, MMX_64, MMX_64}, {MASKMOVDQU, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
 			{{INVALID, 0, 0}, {INVALID, 0, 0}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 37
+			{{INVALID, 0, 0}, {PMOVSXBW, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXBW, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 38
+			{{INVALID, 0, 0}, {PMOVSXBD, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXBD, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 39
+			{{INVALID, 0, 0}, {PMOVSXBQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXBQ, SSE_128, SSE_16}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 40
+			{{INVALID, 0, 0}, {PMOVSXWD, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXWD, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 41
+			{{INVALID, 0, 0}, {PMOVSXWQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXWQ, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 42
+			{{INVALID, 0, 0}, {PMOVSXDQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVSXDQ, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 43
+			{{INVALID, 0, 0}, {INVALID, 0, 0}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {MOVNTDQA, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 44
+			{{INVALID, 0, 0}, {PMOVZXBW, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXBW, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 45
+			{{INVALID, 0, 0}, {PMOVZXBD, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXBD, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 46
+			{{INVALID, 0, 0}, {PMOVZXBQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXBQ, SSE_128, SSE_16}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 47
+			{{INVALID, 0, 0}, {PMOVZXWD, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXWD, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 48
+			{{INVALID, 0, 0}, {PMOVZXWQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXWQ, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 49
+			{{INVALID, 0, 0}, {PMOVZXDQ, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PMOVZXDQ, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 50
+			{{INVALID, 0, 0}, {ROUNDSS, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {ROUNDSS, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 51
+			{{INVALID, 0, 0}, {ROUNDSD, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {ROUNDSD, SSE_128, SSE_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 52
+			{{INVALID, 0, 0}, {PEXTRB, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PEXTRB, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 53
+			{{INVALID, 0, 0}, {PEXTRW, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PEXTRW, SSE_128, SSE_16}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 54
+			{{INVALID, 0, 0}, {PEXTRD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PEXTRD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 55
+			{{INVALID, 0, 0}, {EXTRACTPS, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {EXTRACTPS, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 56
+			{{INVALID, 0, 0}, {PINSRB, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PINSRB, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 57
+			{{INVALID, 0, 0}, {INSERTPS, SSE_128, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {INSERTPS, SSE_128, SSE_32}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+		},
+		{ // Entry 58
+			{{INVALID, 0, 0}, {PINSRD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}},
+			{{INVALID, 0, 0}, {PINSRD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {INVALID, 0, 0}}
 		}
 	};
 
@@ -1419,7 +1545,6 @@ namespace x86
 		case MMX_64:
 			return mmxRegList;
 		case GPR_32_OR_64:
-		case GPR_32_OR_64_INCOP:
 			return (state->opSize == 8) ? reg64List : reg32List;
 		default:
 			return xmmRegList;
@@ -1431,6 +1556,8 @@ namespace x86
 	{
 		switch (type)
 		{
+		case SSE_16:
+			return 2;
 		case SSE_32:
 		case MMX_32:
 			return 4;
@@ -1438,7 +1565,6 @@ namespace x86
 		case MMX_64:
 			return 8;
 		case GPR_32_OR_64:
-		case GPR_32_OR_64_INCOP:
 			return (state->opSize == 8) ? 8 : 4;
 		default:
 			return 16;
@@ -1448,7 +1574,7 @@ namespace x86
 
 	void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16 type)
 	{
-		if ((type == GPR_32_OR_64_INCOP) && (state->opSize == 8))
+		if ((type == GPR_32_OR_64) && (state->opSize == 8))
 			state->result->operation = (InstructionOperation)((int)state->result->operation + 1);
 	}
 
@@ -1461,19 +1587,16 @@ namespace x86
 
 	static void __fastcall DecodeTwoByte(DecodeState* restrict state)
 	{
-		ProcessOpcode(state, twoByteOpcodeMap, Read8(state));
-	}
-
-
-	static void __fastcall DecodeThreeByte0F38(DecodeState* restrict state)
-	{
-		ProcessSparseOpcode(state, threeByte0F38Map, sizeof(threeByte0F38Map) / sizeof(SparseInstructionEncoding), Read8(state));
-	}
-
-
-	static void __fastcall DecodeThreeByte0F3A(DecodeState* restrict state)
-	{
-		ProcessSparseOpcode(state, threeByte0F3AMap, sizeof(threeByte0F3AMap) / sizeof(SparseInstructionEncoding), Read8(state));
+		uint8 opcode = Read8(state);
+		if (opcode == 0x38)
+			ProcessSparseOpcode(state, threeByte0F38Map, sizeof(threeByte0F38Map) / sizeof(SparseInstructionEncoding), Read8(state));
+		else if (opcode == 0x3a)
+		{
+			ProcessSparseOpcode(state, threeByte0F3AMap, sizeof(threeByte0F3AMap) / sizeof(SparseInstructionEncoding), Read8(state));
+			SetOperandToImm8(state, &state->result->operands[2]);
+		}
+		else
+			ProcessOpcode(state, twoByteOpcodeMap, opcode);
 	}
 
 
@@ -1730,7 +1853,16 @@ namespace x86
 	static void __fastcall DecodeGroup0F01(DecodeState* restrict state)
 	{
 		uint8 rm = Peek8(state);
+		uint8 modField = (rm >> 6) & 3;
 		uint8 regField = (rm >> 3) & 7;
+		uint8 rmField = rm & 7;
+
+		if (modField == 3)
+		{
+			state->result->operation = (InstructionOperation)group0F01RegOperations[rmField][regField];
+			return;
+		}
+
 		if (regField < 4)
 			state->opSize = state->using64 ? 10 : 6;
 		else if (regField != 7)
@@ -1910,8 +2042,12 @@ namespace x86
 		DecodeRMReg(state, GetOperandForSSEEntryType(state, opEntry->rmType, 1), GetRegListForSSEEntryType(state, opEntry->rmType),
 			GetSizeForSSEEntryType(state, opEntry->rmType), GetOperandForSSEEntryType(state, opEntry->regType, 0),
 			GetRegListForSSEEntryType(state, opEntry->regType), GetSizeForSSEEntryType(state, opEntry->regType));
-		UpdateOperationForSSEEntryType(state, opEntry->regType);
-		UpdateOperationForSSEEntryType(state, opEntry->rmType);
+
+		if (state->flags & DEC_FLAG_INC_OPERATION_FOR_64)
+		{
+			UpdateOperationForSSEEntryType(state, opEntry->regType);
+			UpdateOperationForSSEEntryType(state, opEntry->rmType);
+		}
 	}
 
 
@@ -1919,6 +2055,16 @@ namespace x86
 	{
 		DecodeSSETable(state);
 		SetOperandToImm8(state, &state->result->operands[2]);
+	}
+
+
+	static void __fastcall DecodeSSETableMem8(DecodeState* restrict state)
+	{
+		DecodeSSETable(state);
+		if (state->operand0->operand == MEM)
+			state->operand0->size = 1;
+		if (state->operand1->operand == MEM)
+			state->operand1->size = 1;
 	}
 
 
@@ -2131,11 +2277,35 @@ namespace x86
 
 	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state)
 	{
-		if (state->opSize == 2)
-			state->opSize = 4;
-		else if (state->opSize == 8)
-			state->result->operation = CMPXCH16B;
-		DecodeRM(state, state->operand0, GetRegListForOpSize(state), state->opSize * 2, NULL);
+		uint8 rm = Peek8(state);
+		uint8 regField = (rm >> 3) & 7;
+
+		if (regField == 1)
+		{
+			if (state->opSize == 2)
+				state->opSize = 4;
+			else if (state->opSize == 8)
+				state->result->operation = CMPXCH16B;
+			DecodeRM(state, state->operand0, GetRegListForOpSize(state), state->opSize * 2, NULL);
+		}
+		else if (regField == 6)
+		{
+			if (state->opPrefix)
+				state->result->operation = VMCLEAR;
+			else if (state->rep == REP_PREFIX_REPE)
+				state->result->operation = VMXON;
+			else
+				state->result->operation = VMPTRLD;
+			DecodeRM(state, state->operand0, reg64List, 8, NULL);
+		}
+		else if (regField == 7)
+		{
+			state->result->operation = VMPTRST;
+			DecodeRM(state, state->operand0, reg64List, 8, NULL);
+		}
+		else
+			state->invalid = true;
+
 		if (state->operand0->operand != MEM)
 			state->invalid = true;
 	}
@@ -2148,6 +2318,15 @@ namespace x86
 		DecodeRMReg(state, state->operand0, GetRegListForOpSize(state), state->opSize, state->operand1, GetRegListForOpSize(state), state->opSize);
 		if (state->operand0->operand != MEM)
 			state->invalid = true;
+	}
+
+
+	static void __fastcall DecodeCrc32(DecodeState* restrict state)
+	{
+		const RegDef* srcRegList = GetRegListForFinalOpSize(state);
+		const RegDef* destRegList = (state->opSize == 8) ? reg64List : reg32List;
+		uint16 destSize = (state->opSize == 8) ? 8 : 4;
+		DecodeRMReg(state, state->operand1, srcRegList, state->finalOpSize, state->operand0, destRegList, destSize);
 	}
 
 
