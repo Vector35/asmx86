@@ -29,22 +29,22 @@
 #define __fastcall
 #endif
 
-#define DEC_FLAG_LOCK					0x0020
-#define DEC_FLAG_REP					0x0040
-#define DEC_FLAG_REP_COND				0x0080
-#define DEC_FLAG_BYTE					0x0100
-#define DEC_FLAG_FLIP_OPERANDS			0x0200
-#define DEC_FLAG_IMM_SX					0x0400
-#define DEC_FLAG_INC_OPERATION_FOR_64		0x0800
-#define DEC_FLAG_OPERATION_OP_SIZE		0x1000
-#define DEC_FLAG_FORCE_16BIT			0x2000
-#define DEC_FLAG_INVALID_IN_64BIT		0x4000
-#define DEC_FLAG_DEFAULT_TO_64BIT		0x8000
+#define DEC_FLAG_LOCK                   0x0020
+#define DEC_FLAG_REP                    0x0040
+#define DEC_FLAG_REP_COND               0x0080
+#define DEC_FLAG_BYTE                   0x0100
+#define DEC_FLAG_FLIP_OPERANDS          0x0200
+#define DEC_FLAG_IMM_SX                 0x0400
+#define DEC_FLAG_INC_OPERATION_FOR_64   0x0800
+#define DEC_FLAG_OPERATION_OP_SIZE      0x1000
+#define DEC_FLAG_FORCE_16BIT            0x2000
+#define DEC_FLAG_INVALID_IN_64BIT       0x4000
+#define DEC_FLAG_DEFAULT_TO_64BIT       0x8000
 
-#define DEC_FLAG_REG_RM_SIZE_MASK		0x03
-#define DEC_FLAG_REG_RM_2X_SIZE			0x01
-#define DEC_FLAG_REG_RM_FAR_SIZE		0x02
-#define DEC_FLAG_REG_RM_NO_SIZE			0x03
+#define DEC_FLAG_REG_RM_SIZE_MASK       0x03
+#define DEC_FLAG_REG_RM_2X_SIZE         0x01
+#define DEC_FLAG_REG_RM_FAR_SIZE        0x02
+#define DEC_FLAG_REG_RM_NO_SIZE         0x03
 
 
 #ifdef __cplusplus
