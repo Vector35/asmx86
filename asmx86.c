@@ -1857,7 +1857,7 @@ namespace x86
 		uint8 regField = (rm >> 3) & 7;
 		uint8 rmField = rm & 7;
 
-		if (modField == 3)
+		if ((modField == 3) && (regField != 4) && (regField != 6))
 		{
 			state->result->operation = (InstructionOperation)group0F01RegOperations[rmField][regField];
 			return;
