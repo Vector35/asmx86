@@ -329,6 +329,18 @@ namespace asmx86
 		return (uint8_t)(r - REG_RAX);
 	}
 
+	static __inline uint8_t __alwaysinline __xmm_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	{
+		__CGX86_ASSERT((r >= REG_XMM0) && (r <= REG_XMM7), "Bad XMM register");
+		return (uint8_t)(r - REG_XMM0);
+	}
+
+	static __inline uint8_t __alwaysinline __xmm_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	{
+		__CGX86_ASSERT((r >= REG_XMM0) && (r <= REG_XMM15), "Bad XMM register");
+		return (uint8_t)(r - REG_XMM0);
+	}
+
 
 	// Prefix routines
 	static __inline void __alwaysinline __segprefix(uint8_t* buf, int wr, OperandType s)
@@ -717,6 +729,9 @@ namespace asmx86
 #ifdef __reg64
 #undef __reg64
 #endif
+#ifdef __xmmreg
+#undef __xmmreg
+#endif
 #ifdef __onebyte_opreg
 #undef __onebyte_opreg
 #endif
@@ -739,6 +754,7 @@ namespace asmx86
 #define __reg8(r) __reg8_32bit(r __REG_DEBUG_PARAMS)
 #define __reg16(r) __reg16_32bit(r __REG_DEBUG_PARAMS)
 #define __reg32(r) __reg32_32bit(r __REG_DEBUG_PARAMS)
+#define __xmmreg(r) __xmm_32bit(r __REG_DEBUG_PARAMS)
 #define __onebyte_opreg __onebyte_opreg_32bit
 #define __onebyte_opreg_imm8 __onebyte_opreg_imm8_32bit
 #define __onebyte_opreg_imm32 __onebyte_opreg_imm32_32bit
@@ -750,6 +766,7 @@ namespace asmx86
 #define __reg16(r) __reg16_64bit(r __REG_DEBUG_PARAMS)
 #define __reg32(r) __reg32_64bit(r __REG_DEBUG_PARAMS)
 #define __reg64(r) __reg64_64bit(r __REG_DEBUG_PARAMS)
+#define __xmmreg(r) __xmm_64bit(r __REG_DEBUG_PARAMS)
 #define __onebyte_opreg __onebyte_opreg_64bit
 #define __onebyte_opreg_imm8 __onebyte_opreg_imm8_64bit
 #define __onebyte_opreg_imm32 __onebyte_opreg_imm32_64bit
@@ -1907,6 +1924,24 @@ namespace asmx86
 		}
 	}
 
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t a, uint8_t b)
+	{
+		__TRANSLATE_UNUSED
+		__ASSERT_NO_INVALID_8BIT_COMBO
+		if (__MODRM(reg_need_rex) (a, b))
+		{
+			__WRITE_BUF_8(0, prefix);
+			__WRITE_BUF_8_8_8_8(1, __MODRM(reg_get_rex) (a, b), 0x0f, op, 0xc0 | ((a & 7) << 3) | (b & 7));
+			return 5;
+		}
+		else
+		{
+			__WRITE_BUF_8_8(0, prefix, 0x0f);
+			__WRITE_BUF_8_8(2, op, 0xc0 | (a << 3) | b);
+			return 4;
+		}
+	}
+
 	static __inline size_t __alwaysinline __MODRM(mem_twobyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
@@ -1919,6 +1954,22 @@ namespace asmx86
 		{
 			__WRITE_BUF_8_8(0, 0x0f, op);
 			return __MODRM(emit) (__CONTEXT_OFFSET(2), reg, __MEMOP(m), immsz) + 2;
+		}
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
+	{
+		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
+		{
+			__WRITE_BUF_8_8(0, prefix, __MODRM(mem_get_rex) (reg, __MEMOP(m)));
+			__WRITE_BUF_8_8(2, 0x0f, op);
+			return __MODRM(emit) (__CONTEXT_OFFSET(4), reg, __MEMOP(m), immsz) + 3;
+		}
+		else
+		{
+			__WRITE_BUF_8(0, prefix);
+			__WRITE_BUF_8_8(1, 0x0f, op);
+			return __MODRM(emit) (__CONTEXT_OFFSET(3), reg, __MEMOP(m), immsz) + 2;
 		}
 	}
 
@@ -3465,9 +3516,17 @@ namespace asmx86
 	__ONEBYTE_INSTR_64(scasq, 0xaf)
 #endif
 
+
 	// Floating point instructions
 	__FPU_TWOBYTE_INSTR(fnop, 0xd9, 0xd0)
 	__DEF_INSTR_1(fstenv, m, __MEM) { return __MODRM(mem_onebyte) (__CONTEXT, 0xd9, 6, __MEMOP(a), 0); }
+
+
+	// SSE instructions
+	__DEF_INSTR_2(movsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x10, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(movsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x10, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(movsd, mr, __MEM, __REG) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x11, __xmmreg(b), __MEMOP(a), 0); }
+
 
 	// Misc instructions
 #ifdef __CODEGENX86_32BIT
