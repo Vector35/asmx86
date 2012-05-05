@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 			fprintf(fp, "%c", str[i]);
 	}
 	fprintf(fp, "\";\n");
-	fprintf(fp, "static const %s operationOffsets[] = {", (str.size() < 256) ? "uint8" : "uint16");
+	fprintf(fp, "static const %s operationOffsets[] = {", (str.size() < 256) ? "uint8_t" : "uint16_t");
 	for (size_t i = 0; i < offset.size(); i++)
 	{
 		if (i != 0)
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 			fprintf(fp, "%c", str[i]);
 	}
 	fprintf(fp, "\";\n");
-	fprintf(fp, "static const %s operandOffsets[] = {", (str.size() < 256) ? "uint8" : "uint16");
+	fprintf(fp, "static const %s operandOffsets[] = {", (str.size() < 256) ? "uint8_t" : "uint16_t");
 	for (size_t i = 0; i < offset.size(); i++)
 	{
 		if (i != 0)

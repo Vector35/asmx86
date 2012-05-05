@@ -85,8 +85,8 @@ namespace asmx86
 
 	struct JumpLabel
 	{
-		uint8* chain;
-		uint8* addr;
+		uint8_t* chain;
+		uint8_t* addr;
 		int nearJump;
 	};
 #ifndef __cplusplus
@@ -122,10 +122,10 @@ namespace asmx86
 
 
 #define __REG_PARAM(n) OperandType n
-#define __IMM8_PARAM(n) int8 n
-#define __IMM16_PARAM(n) int16 n
-#define __IMM32_PARAM(n) int32 n
-#define __IMM64_PARAM(n) int64 n
+#define __IMM8_PARAM(n) int8_t n
+#define __IMM16_PARAM(n) int16_t n
+#define __IMM32_PARAM(n) int32_t n
+#define __IMM64_PARAM(n) int64_t n
 #define __PTR_PARAM(n) const void* n
 #define __TARGET_PARAM(n) JumpLabel* n
 
@@ -139,7 +139,7 @@ namespace asmx86
 
 #ifdef __GNUC__
 // GCC does not produce optimal code with inlined structure params, pass each member individually
-#define __MEM_PARAM(n) OperandType n ## _base, OperandType n ## _index, uint8 n ## _scale, ssize_t n ## _offset
+#define __MEM_PARAM(n) OperandType n ## _base, OperandType n ## _index, uint8_t n ## _scale, ssize_t n ## _offset
 #define __MEM __MEM_PARAM
 #define __MEMOP(n) n ## _base, n ## _index, n ## _scale, n ## _offset
 #define __MEM_BASE(n) n ## _base
@@ -153,7 +153,7 @@ namespace asmx86
 	{
 		OperandType base;
 		OperandType index;
-		uint8 scale;
+		uint8_t scale;
 		ssize_t offset;
 	};
 #ifndef __cplusplus
@@ -170,7 +170,7 @@ namespace asmx86
 #endif
 
 #ifdef X86_CODEGEN_DEBUG
-#define __CONTEXT_PARAMS uint8* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr, const char* loc, size_t locLen
+#define __CONTEXT_PARAMS uint8_t* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr, const char* loc, size_t locLen
 #define __CONTEXT buf, translate, param, wr, loc, locLen
 #define __EMIT_CONTEXT(buf) buf, 0, 0, 1, __CGX86_LOCATION
 #define __EMIT_CONTEXT_OFFSET(buf, n) (&(buf)[n]), 0, 0, 1, __CGX86_LOCATION
@@ -179,7 +179,7 @@ namespace asmx86
 #define __LENGTH_CONTEXT 0, 0, 0, 0, __CGX86_LOCATION
 #define __NO_ASSERT (void)loc; (void)locLen;
 #else
-#define __CONTEXT_PARAMS uint8* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr
+#define __CONTEXT_PARAMS uint8_t* buf, const void* (*translate)(const void* buf, void* param), void* param, int wr
 #define __CONTEXT buf, translate, param, wr
 #define __EMIT_CONTEXT(buf) buf, 0, 0, 1
 #define __EMIT_CONTEXT_OFFSET(buf, n) (&(buf)[n]), 0, 0, 1
@@ -208,16 +208,16 @@ namespace asmx86
 #define X86_INIT_NEAR_JUMP_LABEL(n) (n.chain = 0, n.addr = 0, n.nearJump = 1)
 
 #define __WRITE_BUF_8(offset, val) ((wr) ? ((buf)[offset] = (val)) : (val))
-#define __WRITE_BUF_8_8(offset, a, b) __WRITE_BUF_16(offset, (int16)(((b) << 8) | ((a) & 0xff)))
-#define __WRITE_BUF_8_8_8_8(offset, a, b, c, d) __WRITE_BUF_32(offset, (int32)(((d) << 24) | (((c) & 0xff) << 16) | (((b) & 0xff) << 8) | ((a) & 0xff)))
-#define __WRITE_BUF_16(offset, val) ((wr) ? (*((int16*)&(buf)[offset]) = (val)) : (val))
-#define __WRITE_BUF_32(offset, val) ((wr) ? (*((int32*)&(buf)[offset]) = (val)) : (val))
-#define __WRITE_BUF_64(offset, val) ((wr) ? (*((int64*)&(buf)[offset]) = (val)) : (val))
+#define __WRITE_BUF_8_8(offset, a, b) __WRITE_BUF_16(offset, (int16_t)(((b) << 8) | ((a) & 0xff)))
+#define __WRITE_BUF_8_8_8_8(offset, a, b, c, d) __WRITE_BUF_32(offset, (int32_t)(((d) << 24) | (((c) & 0xff) << 16) | (((b) & 0xff) << 8) | ((a) & 0xff)))
+#define __WRITE_BUF_16(offset, val) ((wr) ? (*((int16_t*)&(buf)[offset]) = (val)) : (val))
+#define __WRITE_BUF_32(offset, val) ((wr) ? (*((int32_t*)&(buf)[offset]) = (val)) : (val))
+#define __WRITE_BUF_64(offset, val) ((wr) ? (*((int64_t*)&(buf)[offset]) = (val)) : (val))
 #define __WRITE_BUF_8_ALWAYS(offset, val) (buf)[offset] = (val)
-#define __WRITE_BUF_8_8_ALWAYS(offset, a, b) __WRITE_BUF_16_ALWAYS(offset, (int16)(((b) << 8) | ((a) & 0xff)))
-#define __WRITE_BUF_16_ALWAYS(offset, val) *((int16*)&(buf)[offset]) = (val)
-#define __WRITE_BUF_32_ALWAYS(offset, val) *((int32*)&(buf)[offset]) = (val)
-#define __WRITE_BUF_64_ALWAYS(offset, val) *((int64*)&(buf)[offset]) = (val)
+#define __WRITE_BUF_8_8_ALWAYS(offset, a, b) __WRITE_BUF_16_ALWAYS(offset, (int16_t)(((b) << 8) | ((a) & 0xff)))
+#define __WRITE_BUF_16_ALWAYS(offset, val) *((int16_t*)&(buf)[offset]) = (val)
+#define __WRITE_BUF_32_ALWAYS(offset, val) *((int32_t*)&(buf)[offset]) = (val)
+#define __WRITE_BUF_64_ALWAYS(offset, val) *((int64_t*)&(buf)[offset]) = (val)
 #define __BUF_OFFSET(offset) (&(buf)[offset])
 
 #ifdef X86_CODEGEN_DEBUG
@@ -241,15 +241,15 @@ namespace asmx86
 #ifdef __GNUC__
 #define X86_MEM(base, offset) (base), NONE, 1, (offset)
 #define X86_MEM_INDEX(base, index, scale, offset) (base), (index), (scale), (offset)
-#define X86_MEM_PTR(ptr) NONE, NONE, 1, (int32)(size_t)(ptr)
+#define X86_MEM_PTR(ptr) NONE, NONE, 1, (int32_t)(size_t)(ptr)
 #define X86_MEM_PARAM(base, index, scale, offset) (base), (index), (scale), (offset)
 #else
 #define X86_MEM(base, offset) __cgx86_mem((base), NONE, 1, (offset))
 #define X86_MEM_INDEX(base, index, scale, offset) __cgx86_mem((base), (index), (scale), (offset))
-#define X86_MEM_PTR(ptr) __cgx86_mem(NONE, NONE, 1, (int32)(size_t)(ptr))
+#define X86_MEM_PTR(ptr) __cgx86_mem(NONE, NONE, 1, (int32_t)(size_t)(ptr))
 #define X86_MEM_PARAM(m) (m)
 
-	static __inline __cgx86_mem_struct __cgx86_mem(OperandType base, OperandType index, uint8 scale, ssize_t offset)
+	static __inline __cgx86_mem_struct __cgx86_mem(OperandType base, OperandType index, uint8_t scale, ssize_t offset)
 	{
 		__cgx86_mem_struct m;
 		m.base = base;
@@ -269,25 +269,25 @@ namespace asmx86
 #endif
 
 	// Register operand to register index routines
-	static __inline uint8 __alwaysinline __reg8_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg8_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_AL) && (r <= REG_BH), "Bad 8-bit register");
-		return (uint8)(r - REG_AL);
+		return (uint8_t)(r - REG_AL);
 	}
 
-	static __inline uint8 __alwaysinline __reg8_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg8_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_AL) && (r <= REG_R15B), "Bad 8-bit register");
 		if (r < REG_SPL)
 		{
 			// Legacy usage, no REX involved
-			return (uint8)(r - REG_AL);
+			return (uint8_t)(r - REG_AL);
 		}
 		else if (r >= REG_R8B)
 		{
 			// Normal R8-R15 operation, bit 3 is set so __REX macros will set the proper REX bit,
 			// bit 4 is set so assertion checks know it is an 8bit register
-			return (uint8)(r - REG_R8B + 24);
+			return (uint8_t)(r - REG_R8B + 24);
 		}
 		else
 		{
@@ -295,43 +295,43 @@ namespace asmx86
 			// don't want to actually set any REX bits.  To allow this, bit 3 is not set, so
 			// __REX macros above will not set the REX bit, but the presence of a REX byte is
 			// forced as the value is >= 8
-			return (uint8)(r - REG_SPL + 20);
+			return (uint8_t)(r - REG_SPL + 20);
 		}
 	}
 
-	static __inline uint8 __alwaysinline __reg16_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg16_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_AX) && (r <= REG_DI), "Bad 16-bit register");
-		return (uint8)(r - REG_AX);
+		return (uint8_t)(r - REG_AX);
 	}
 
-	static __inline uint8 __alwaysinline __reg16_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg16_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_AX) && (r <= REG_R15W), "Bad 16-bit register");
-		return (uint8)(r - REG_AX);
+		return (uint8_t)(r - REG_AX);
 	}
 
-	static __inline uint8 __alwaysinline __reg32_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg32_32bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_EAX) && (r <= REG_EDI), "Bad 32-bit register");
-		return (uint8)(r - REG_EAX);
+		return (uint8_t)(r - REG_EAX);
 	}
 
-	static __inline uint8 __alwaysinline __reg32_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg32_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_EAX) && (r <= REG_R15D), "Bad 32-bit register");
-		return (uint8)(r - REG_EAX);
+		return (uint8_t)(r - REG_EAX);
 	}
 
-	static __inline uint8 __alwaysinline __reg64_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
+	static __inline uint8_t __alwaysinline __reg64_64bit(OperandType r  __REG_DEBUG_PARAM_DECL)
 	{
 		__CGX86_ASSERT((r >= REG_RAX) && (r <= REG_R15), "Bad 64-bit register");
-		return (uint8)(r - REG_RAX);
+		return (uint8_t)(r - REG_RAX);
 	}
 
 
 	// Prefix routines
-	static __inline void __alwaysinline __segprefix(uint8* buf, int wr, OperandType s)
+	static __inline void __alwaysinline __segprefix(uint8_t* buf, int wr, OperandType s)
 	{
 		if (s == REG_ES)
 			__WRITE_BUF_8(0, 0x26);
@@ -369,8 +369,9 @@ namespace asmx86
 #define __TWOBYTE_OPSZ_INSTR(n, op) __DEF_INSTR_0(n) { return __twobyte_opsz(__CONTEXT, op); }
 #define __ONEBYTE_INSTR_64(n, op) __DEF_INSTR_0(n) { return __onebyte64(__CONTEXT, op); }
 #define __TWOBYTE_INSTR_64(n, op) __DEF_INSTR_0(n) { return __twobyte64(__CONTEXT, op); }
+#define __FPU_TWOBYTE_INSTR(n, op1, op2) __DEF_INSTR_0(n) { return __fpu_twobyte(__CONTEXT, op1, op2); }
 
-	static __inline size_t __alwaysinline __onebyte(__CONTEXT_PARAMS, uint8 op)
+	static __inline size_t __alwaysinline __onebyte(__CONTEXT_PARAMS, uint8_t op)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -378,7 +379,7 @@ namespace asmx86
 		return 1;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __onebyte_opreg_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -386,7 +387,7 @@ namespace asmx86
 		return 1;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __onebyte_opreg_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -403,7 +404,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte64_opreg(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __onebyte64_opreg(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -415,12 +416,12 @@ namespace asmx86
 		}
 		else
 		{
-			__WRITE_BUF_8(0, op + reg);
-			return 1;
+			__WRITE_BUF_8_8(0, __REX(__REX_64), op + reg);
+			return 2;
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opsz(__CONTEXT_PARAMS, uint8 op)
+	static __inline size_t __alwaysinline __onebyte_opsz(__CONTEXT_PARAMS, uint8_t op)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -428,7 +429,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_imm8(__CONTEXT_PARAMS, uint8 op, int8 imm)
+	static __inline size_t __alwaysinline __onebyte_imm8(__CONTEXT_PARAMS, uint8_t op, int8_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -436,7 +437,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_imm8_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int8 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_imm8_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int8_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -444,7 +445,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_imm8_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int8 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_imm8_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int8_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -462,7 +463,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte_imm16(__CONTEXT_PARAMS, uint8 op, int16 imm)
+	static __inline size_t __alwaysinline __onebyte_imm16(__CONTEXT_PARAMS, uint8_t op, int16_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -471,7 +472,7 @@ namespace asmx86
 		return 3;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_imm32(__CONTEXT_PARAMS, uint8 op, int32 imm)
+	static __inline size_t __alwaysinline __onebyte_imm32(__CONTEXT_PARAMS, uint8_t op, int32_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -480,7 +481,7 @@ namespace asmx86
 		return 5;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_imm32_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int32 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_imm32_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int32_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -489,7 +490,7 @@ namespace asmx86
 		return 5;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_imm32_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int32 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_imm32_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int32_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -507,7 +508,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte_imm64(__CONTEXT_PARAMS, uint8 op, int64 imm)
+	static __inline size_t __alwaysinline __onebyte_imm64(__CONTEXT_PARAMS, uint8_t op, int64_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -516,7 +517,7 @@ namespace asmx86
 		return 9;
 	}
 
-	static __inline size_t __alwaysinline __onebyte64_opreg_imm64(__CONTEXT_PARAMS, uint8 op, uint8 reg, int64 imm)
+	static __inline size_t __alwaysinline __onebyte64_opreg_imm64(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int64_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -525,7 +526,7 @@ namespace asmx86
 		return 10;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opsz_imm8(__CONTEXT_PARAMS, uint8 op, int8 imm)
+	static __inline size_t __alwaysinline __onebyte_opsz_imm8(__CONTEXT_PARAMS, uint8_t op, int8_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -534,7 +535,7 @@ namespace asmx86
 		return 3;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opsz_imm16(__CONTEXT_PARAMS, uint8 op, int16 imm)
+	static __inline size_t __alwaysinline __onebyte_opsz_imm16(__CONTEXT_PARAMS, uint8_t op, int16_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -543,7 +544,7 @@ namespace asmx86
 		return 4;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_opsz_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -551,7 +552,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_opsz_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -568,7 +569,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_opsz_imm16_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int16 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_imm16_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int16_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -577,7 +578,7 @@ namespace asmx86
 		return 4;
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opreg_opsz_imm16_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg, int16 imm)
+	static __inline size_t __alwaysinline __onebyte_opreg_opsz_imm16_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg, int16_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -596,7 +597,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte_opsz_imm32(__CONTEXT_PARAMS, uint8 op, int32 imm)
+	static __inline size_t __alwaysinline __onebyte_opsz_imm32(__CONTEXT_PARAMS, uint8_t op, int32_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -605,7 +606,7 @@ namespace asmx86
 		return 6;
 	}
 
-	static __inline size_t __alwaysinline __twobyte(__CONTEXT_PARAMS, uint8 op)
+	static __inline size_t __alwaysinline __twobyte(__CONTEXT_PARAMS, uint8_t op)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -613,7 +614,15 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __twobyte_opreg_32bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __fpu_twobyte(__CONTEXT_PARAMS, uint8_t op1, uint8_t op2)
+	{
+		__TRANSLATE_UNUSED
+		__NO_ASSERT
+		__WRITE_BUF_8_8(0, op1, op2);
+		return 2;
+	}
+
+	static __inline size_t __alwaysinline __twobyte_opreg_32bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -621,7 +630,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __twobyte_opreg_64bit(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __twobyte_opreg_64bit(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -639,7 +648,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __onebyte64(__CONTEXT_PARAMS, uint8 op)
+	static __inline size_t __alwaysinline __onebyte64(__CONTEXT_PARAMS, uint8_t op)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -647,7 +656,7 @@ namespace asmx86
 		return 2;
 	}
 
-	static __inline size_t __alwaysinline __onebyte64_imm8(__CONTEXT_PARAMS, uint8 op, int8 imm)
+	static __inline size_t __alwaysinline __onebyte64_imm8(__CONTEXT_PARAMS, uint8_t op, int8_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -656,7 +665,7 @@ namespace asmx86
 		return 3;
 	}
 
-	static __inline size_t __alwaysinline __onebyte64_imm32(__CONTEXT_PARAMS, uint8 op, int32 imm)
+	static __inline size_t __alwaysinline __onebyte64_imm32(__CONTEXT_PARAMS, uint8_t op, int32_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -665,7 +674,7 @@ namespace asmx86
 		return 6;
 	}
 
-	static __inline size_t __alwaysinline __onebyte64_imm64(__CONTEXT_PARAMS, uint8 op, int64 imm)
+	static __inline size_t __alwaysinline __onebyte64_imm64(__CONTEXT_PARAMS, uint8_t op, int64_t imm)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -674,7 +683,7 @@ namespace asmx86
 		return 10;
 	}
 
-	static __inline size_t __alwaysinline __twobyte64(__CONTEXT_PARAMS, uint8 op)
+	static __inline size_t __alwaysinline __twobyte64(__CONTEXT_PARAMS, uint8_t op)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -683,7 +692,7 @@ namespace asmx86
 		return 3;
 	}
 
-	static __inline size_t __alwaysinline __twobyte64_opreg(__CONTEXT_PARAMS, uint8 op, uint8 reg)
+	static __inline size_t __alwaysinline __twobyte64_opreg(__CONTEXT_PARAMS, uint8_t op, uint8_t reg)
 	{
 		__TRANSLATE_UNUSED
 		__NO_ASSERT
@@ -777,6 +786,7 @@ namespace asmx86
 #define X86_EMIT32_R(buf, op, a) __NAME32(op, r) (__EMIT_CONTEXT(buf), a)
 #define X86_EMIT32_M(buf, op, a) __NAME32(op, m) (__EMIT_CONTEXT(buf), X86_MEM_PARAM(a))
 #define X86_EMIT32_I(buf, op, a) __NAME32(op, i) (__EMIT_CONTEXT(buf), a)
+#define X86_EMIT32_II(buf, op, a, b) __NAME32(op, ii) (__EMIT_CONTEXT(buf), a, b)
 #define X86_EMIT32_P(buf, op, a) __NAME32(op, p) (__EMIT_CONTEXT(buf), a)
 #define X86_EMIT32_T(buf, op, a) __NAME32(op, t) (__EMIT_CONTEXT(buf), &a)
 #define X86_EMIT32_RR(buf, op, a, b) __NAME32(op, rr) (__EMIT_CONTEXT(buf), a, b)
@@ -802,6 +812,7 @@ namespace asmx86
 #define X86_ALTEXEC_EMIT32_R(buf, xlat, param, op, a) __NAME32(op, r) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
 #define X86_ALTEXEC_EMIT32_M(buf, xlat, param, op, a) __NAME32(op, m) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), X86_MEM_PARAM(a))
 #define X86_ALTEXEC_EMIT32_I(buf, xlat, param, op, a) __NAME32(op, i) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
+#define X86_ALTEXEC_EMIT32_II(buf, xlat, param, op, a, b) __NAME32(op, ii) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a, b)
 #define X86_ALTEXEC_EMIT32_P(buf, xlat, param, op, a) __NAME32(op, p) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
 #define X86_ALTEXEC_EMIT32_T(buf, xlat, param, op, a) __NAME32(op, t) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), &a)
 #define X86_ALTEXEC_EMIT32_RR(buf, xlat, param, op, a, b) __NAME32(op, rr) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a, b)
@@ -827,6 +838,7 @@ namespace asmx86
 #define X86_LENGTH32_R(op, a) __NAME32(op, r) (__LENGTH_CONTEXT, a)
 #define X86_LENGTH32_M(op, a) __NAME32(op, m) (__LENGTH_CONTEXT, X86_MEM_PARAM(a))
 #define X86_LENGTH32_I(op, a) __NAME32(op, i) (__LENGTH_CONTEXT, a)
+#define X86_LENGTH32_II(op, a, b) __NAME32(op, ii) (__LENGTH_CONTEXT, a, b)
 #define X86_LENGTH32_P(op, a) __NAME32(op, p) (__LENGTH_CONTEXT, a)
 #define X86_LENGTH32_T(op, a) __NAME32(op, t) (__LENGTH_CONTEXT, &a)
 #define X86_LENGTH32_RR(op, a, b) __NAME32(op, rr) (__LENGTH_CONTEXT, a, b)
@@ -852,6 +864,7 @@ namespace asmx86
 #define X86_DYNALLOC_EMIT32_R(buf, alloc, adv, op, a) adv(buf, X86_EMIT32_R(alloc(buf, X86_LENGTH32_R(op, a)), op, a))
 #define X86_DYNALLOC_EMIT32_M(buf, alloc, adv, op, a) adv(buf, X86_EMIT32_M(alloc(buf, X86_LENGTH32_M(op, X86_MEM_PARAM(a))), op, X86_MEM_PARAM(a)))
 #define X86_DYNALLOC_EMIT32_I(buf, alloc, adv, op, a) adv(buf, X86_EMIT32_I(alloc(buf, X86_LENGTH32_I(op, a)), op, a))
+#define X86_DYNALLOC_EMIT32_II(buf, alloc, adv, op, a, b) adv(buf, X86_EMIT32_II(alloc(buf, X86_LENGTH32_II(op, a, b)), op, a, b))
 #define X86_DYNALLOC_EMIT32_P(buf, alloc, adv, op, a) adv(buf, X86_EMIT32_P(alloc(buf, X86_LENGTH32_P(op, a)), op, a))
 #define X86_DYNALLOC_EMIT32_T(buf, alloc, adv, op, a) adv(buf, X86_EMIT32_T(alloc(buf, X86_LENGTH32_T(op, a)), op, a))
 #define X86_DYNALLOC_EMIT32_RR(buf, alloc, adv, op, a, b) adv(buf, X86_EMIT32_RR(alloc(buf, X86_LENGTH32_RR(op, a, b)), op, a, b))
@@ -877,6 +890,7 @@ namespace asmx86
 #define X86_DYNALLOC_ALTEXEC_EMIT32_R(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT32_R(alloc(buf, X86_LENGTH32_R(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT32_M(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT32_M(alloc(buf, X86_LENGTH32_M(op, X86_MEM_PARAM(a))), xlat, param, op, X86_MEM_PARAM(a)))
 #define X86_DYNALLOC_ALTEXEC_EMIT32_I(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT32_I(alloc(buf, X86_LENGTH32_I(op, a)), xlat, param, op, a))
+#define X86_DYNALLOC_ALTEXEC_EMIT32_II(buf, alloc, adv, xlat, param, op, a, b) adv(buf, X86_ALTEXEC_EMIT32_II(alloc(buf, X86_LENGTH32_II(op, a, b)), xlat, param, op, a, b))
 #define X86_DYNALLOC_ALTEXEC_EMIT32_P(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT32_P(alloc(buf, X86_LENGTH32_P(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT32_T(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT32_T(alloc(buf, X86_LENGTH32_T(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT32_RR(buf, alloc, adv, xlat, param, op, a, b) adv(buf, X86_ALTEXEC_EMIT32_RR(alloc(buf, X86_LENGTH32_RR(op, a, b)), xlat, param, op, a, b))
@@ -904,6 +918,7 @@ namespace asmx86
 #define X86_EMIT64_R(buf, op, a) __NAME64(op, r) (__EMIT_CONTEXT(buf), a)
 #define X86_EMIT64_M(buf, op, a) __NAME64(op, m) (__EMIT_CONTEXT(buf), X86_MEM_PARAM(a))
 #define X86_EMIT64_I(buf, op, a) __NAME64(op, i) (__EMIT_CONTEXT(buf), a)
+#define X86_EMIT64_II(buf, op, a, b) __NAME64(op, ii) (__EMIT_CONTEXT(buf), a, b)
 #define X86_EMIT64_P(buf, op, a) __NAME64(op, p) (__EMIT_CONTEXT(buf), a)
 #define X86_EMIT64_T(buf, op, a) __NAME64(op, t) (__EMIT_CONTEXT(buf), &a)
 #define X86_EMIT64_RR(buf, op, a, b) __NAME64(op, rr) (__EMIT_CONTEXT(buf), a, b)
@@ -929,6 +944,7 @@ namespace asmx86
 #define X86_ALTEXEC_EMIT64_R(buf, xlat, param, op, a) __NAME64(op, r) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
 #define X86_ALTEXEC_EMIT64_M(buf, xlat, param, op, a) __NAME64(op, m) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), X86_MEM_PARAM(a))
 #define X86_ALTEXEC_EMIT64_I(buf, xlat, param, op, a) __NAME64(op, i) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
+#define X86_ALTEXEC_EMIT64_II(buf, xlat, param, op, a, b) __NAME64(op, ii) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a, b)
 #define X86_ALTEXEC_EMIT64_P(buf, xlat, param, op, a) __NAME64(op, p) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a)
 #define X86_ALTEXEC_EMIT64_T(buf, xlat, param, op, a) __NAME64(op, t) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), &a)
 #define X86_ALTEXEC_EMIT64_RR(buf, xlat, param, op, a, b) __NAME64(op, rr) (__EMIT_ALTEXEC_CONTEXT(buf, xlat, param), a, b)
@@ -954,6 +970,7 @@ namespace asmx86
 #define X86_LENGTH64_R(op, a) __NAME64(op, r) (__LENGTH_CONTEXT, a)
 #define X86_LENGTH64_M(op, a) __NAME64(op, m) (__LENGTH_CONTEXT, X86_MEM_PARAM(a))
 #define X86_LENGTH64_I(op, a) __NAME64(op, i) (__LENGTH_CONTEXT, a)
+#define X86_LENGTH64_II(op, a, b) __NAME64(op, ii) (__LENGTH_CONTEXT, a, b)
 #define X86_LENGTH64_P(op, a) __NAME64(op, p) (__LENGTH_CONTEXT, a)
 #define X86_LENGTH64_T(op, a) __NAME64(op, t) (__LENGTH_CONTEXT, &a)
 #define X86_LENGTH64_RR(op, a, b) __NAME64(op, rr) (__LENGTH_CONTEXT, a, b)
@@ -979,6 +996,7 @@ namespace asmx86
 #define X86_DYNALLOC_EMIT64_R(buf, alloc, adv, op, a) adv(buf, X86_EMIT64_R(alloc(buf, X86_LENGTH64_R(op, a)), op, a))
 #define X86_DYNALLOC_EMIT64_M(buf, alloc, adv, op, a) adv(buf, X86_EMIT64_M(alloc(buf, X86_LENGTH64_M(op, X86_MEM_PARAM(a))), op, X86_MEM_PARAM(a)))
 #define X86_DYNALLOC_EMIT64_I(buf, alloc, adv, op, a) adv(buf, X86_EMIT64_I(alloc(buf, X86_LENGTH64_I(op, a)), op, a))
+#define X86_DYNALLOC_EMIT64_II(buf, alloc, adv, op, a, b) adv(buf, X86_EMIT64_II(alloc(buf, X86_LENGTH64_II(op, a, b)), op, a, b))
 #define X86_DYNALLOC_EMIT64_P(buf, alloc, adv, op, a) adv(buf, X86_EMIT64_P(alloc(buf, X86_LENGTH64_P(op, a)), op, a))
 #define X86_DYNALLOC_EMIT64_T(buf, alloc, adv, op, a) adv(buf, X86_EMIT64_T(alloc(buf, X86_LENGTH64_T(op, a)), op, a))
 #define X86_DYNALLOC_EMIT64_RR(buf, alloc, adv, op, a, b) adv(buf, X86_EMIT64_RR(alloc(buf, X86_LENGTH64_RR(op, a, b)), op, a, b))
@@ -1004,6 +1022,7 @@ namespace asmx86
 #define X86_DYNALLOC_ALTEXEC_EMIT64_R(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT64_R(alloc(buf, X86_LENGTH64_R(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT64_M(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT64_M(alloc(buf, X86_LENGTH64_M(op, X86_MEM_PARAM(a))), xlat, param, op, X86_MEM_PARAM(a)))
 #define X86_DYNALLOC_ALTEXEC_EMIT64_I(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT64_I(alloc(buf, X86_LENGTH64_I(op, a)), xlat, param, op, a))
+#define X86_DYNALLOC_ALTEXEC_EMIT64_II(buf, alloc, adv, xlat, param, op, a, b) adv(buf, X86_ALTEXEC_EMIT64_II(alloc(buf, X86_LENGTH64_II(op, a, b)), xlat, param, op, a, b))
 #define X86_DYNALLOC_ALTEXEC_EMIT64_P(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT64_P(alloc(buf, X86_LENGTH64_P(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT64_T(buf, alloc, adv, xlat, param, op, a) adv(buf, X86_ALTEXEC_EMIT64_T(alloc(buf, X86_LENGTH64_T(op, a)), xlat, param, op, a))
 #define X86_DYNALLOC_ALTEXEC_EMIT64_RR(buf, alloc, adv, xlat, param, op, a, b) adv(buf, X86_ALTEXEC_EMIT64_RR(alloc(buf, X86_LENGTH64_RR(op, a, b)), xlat, param, op, a, b))
@@ -1049,11 +1068,11 @@ namespace asmx86
 	#define __FORWARD_REF_JCXZ_JUMP_SIZE 10
 	#define __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE 10
 
-	static __inline void __PREFIX(mark_label) (uint8* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __PREFIX(mark_label) (uint8_t* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
 	{
 		while (target->chain)
 		{
-			uint8* next = (uint8*)(size_t)*(uint32*)target->chain;
+			uint8_t* next = (uint8_t*)(size_t)*(uint32_t*)target->chain;
 			__JumpTargetType type = (__JumpTargetType)target->chain[4];
 			const void* translatedPtr = target->chain;
 			if (translate)
@@ -1061,16 +1080,16 @@ namespace asmx86
 			if (type == __JUMPTARGET_ALWAYS)
 			{
 				target->chain[0] = 0xe9;
-				*((uint32*)&target->chain[1]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 5));
+				*((uint32_t*)&target->chain[1]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 5));
 			}
 			else if (type == __JUMPTARGET_JCXZ)
 			{
-				int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+				int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 3));
 				if ((diff >= -0x80) && (diff <= 0x7f))
 				{
 					target->chain[0] = 0x67;
 					target->chain[1] = 0xe3;
-					target->chain[2] = (uint8)diff;
+					target->chain[2] = (uint8_t)diff;
 					target->chain[3] = 0xeb;
 					target->chain[4] = 5;
 				}
@@ -1082,16 +1101,16 @@ namespace asmx86
 					target->chain[3] = 0xeb;
 					target->chain[4] = 5;
 					target->chain[5] = 0xe9;
-					*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+					*((uint32_t*)&target->chain[6]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 10));
 				}
 			}
 			else if (type == __JUMPTARGET_JECXZ)
 			{
-				int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+				int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 2));
 				if ((diff >= -0x80) && (diff <= 0x7f))
 				{
 					target->chain[0] = 0xe3;
-					target->chain[1] = (uint8)diff;
+					target->chain[1] = (uint8_t)diff;
 					target->chain[2] = 0xeb;
 					target->chain[3] = 6;
 					target->chain[4] = 0xff;
@@ -1103,28 +1122,28 @@ namespace asmx86
 					target->chain[2] = 0xeb;
 					target->chain[3] = 6;
 					target->chain[4] = 0xe9;
-					*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+					*((uint32_t*)&target->chain[5]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 9));
 				}
 			}
 			else
 			{
 				target->chain[0] = 0x0f;
-				target->chain[1] = (uint8)(0x80 + type);
-				*((uint32*)&target->chain[2]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 6));
+				target->chain[1] = (uint8_t)(0x80 + type);
+				*((uint32_t*)&target->chain[2]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 6));
 			}
 			target->chain = next;
 		}
 		target->addr = buf;
 	}
 
-	static __inline void __alwaysinline __PREFIX(add_label_ref) (JumpLabel* target, uint8* ref, __JumpTargetType type  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __alwaysinline __PREFIX(add_label_ref) (JumpLabel* target, uint8_t* ref, __JumpTargetType type  __CGX86_ASSERT_PARAM_DECL)
 	{
 		__NO_ASSERT
-		*(uint32*)ref = (uint32)(size_t)target->chain;
-		ref[4] = (uint8)type;
+		*(uint32_t*)ref = (uint32_t)(size_t)target->chain;
+		ref[4] = (uint8_t)type;
 		if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
 		{
-			*((uint32*)&ref[5]) = 0xcccccccc;
+			*((uint32_t*)&ref[5]) = 0xcccccccc;
 			ref[9] = 0xcc;
 		}
 		target->chain = ref;
@@ -1141,36 +1160,36 @@ namespace asmx86
 	#define __FORWARD_REF_JCXZ_JUMP_SIZE 19
 	#define __FORWARD_REF_JCXZ_NEAR_JUMP_SIZE 10
 
-	static __inline void __PREFIX(mark_label) (uint8* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __PREFIX(mark_label) (uint8_t* buf, const void* (*translate)(const void* ptr, void* param), void* param, JumpLabel* target  __CGX86_ASSERT_PARAM_DECL)
 	{
 		while (target->chain)
 		{
 			const void* translatedPtr = target->chain;
-			uint8* next = 0;
+			uint8_t* next = 0;
 			if (translate)
 				translatedPtr = translate(target->chain, param);
 			if (target->nearJump)
 			{
-				int32 refdiff = *(int32*)target->chain;
+				int32_t refdiff = *(int32_t*)target->chain;
 				__JumpTargetType type = (__JumpTargetType)target->chain[4];
 				if (refdiff)
-					next = (uint8*)target->chain + refdiff;
+					next = (uint8_t*)target->chain + refdiff;
 				if (type == __JUMPTARGET_ALWAYS)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 5));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 5));
 					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
 					target->chain[0] = 0xe9;
-					*((int32*)&target->chain[1]) = (int32)diff;
+					*((int32_t*)&target->chain[1]) = (int32_t)diff;
 				}
 				else if (type == __JUMPTARGET_JECXZ)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 3));
 					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
 					if ((diff >= -0x80) && (diff <= 0x7f))
 					{
 						target->chain[0] = 0x67;
 						target->chain[1] = 0xe3;
-						target->chain[2] = (uint8)diff;
+						target->chain[2] = (uint8_t)diff;
 						target->chain[3] = 0xeb;
 						target->chain[4] = 5;
 					}
@@ -1182,17 +1201,17 @@ namespace asmx86
 						target->chain[3] = 0xeb;
 						target->chain[4] = 5;
 						target->chain[5] = 0xe9;
-						*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+						*((uint32_t*)&target->chain[6]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 10));
 					}
 				}
 				else if (type == __JUMPTARGET_JRCXZ)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 2));
 					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
 					if ((diff >= -0x80) && (diff <= 0x7f))
 					{
 						target->chain[0] = 0xe3;
-						target->chain[1] = (uint8)diff;
+						target->chain[1] = (uint8_t)diff;
 						target->chain[2] = 0xeb;
 						target->chain[3] = 6;
 						target->chain[4] = 0xff;
@@ -1204,50 +1223,50 @@ namespace asmx86
 						target->chain[2] = 0xeb;
 						target->chain[3] = 6;
 						target->chain[4] = 0xe9;
-						*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+						*((uint32_t*)&target->chain[5]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 9));
 					}
 				}
 				else
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 6));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 6));
 					__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL), "Near label out of range");
 					target->chain[0] = 0x0f;
-					target->chain[1] = (uint8)(0x80 + type);
-					*((int32*)&target->chain[2]) = (int32)diff;
+					target->chain[1] = (uint8_t)(0x80 + type);
+					*((int32_t*)&target->chain[2]) = (int32_t)diff;
 				}
 			}
 			else
 			{
 				__JumpTargetType type = (__JumpTargetType)target->chain[8];
-				next = (uint8*)(size_t)*(uint64*)target->chain;
+				next = (uint8_t*)(size_t)*(uint64_t*)target->chain;
 				if (type == __JUMPTARGET_ALWAYS)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 5));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 5));
 					if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 					{
 						target->chain[0] = 0xe9;
-						*((int32*)&target->chain[1]) = (int32)diff;
-						*((uint32*)&target->chain[5]) = 0xcccccccc;
+						*((int32_t*)&target->chain[1]) = (int32_t)diff;
+						*((uint32_t*)&target->chain[5]) = 0xcccccccc;
 					}
 					else
 					{
 						target->chain[0] = 0xff;
 						target->chain[1] = 0x25;
-						*((int32*)&target->chain[2]) = 0;
-						*((uint64*)&target->chain[6]) = (uint64)(size_t)buf;
+						*((int32_t*)&target->chain[2]) = 0;
+						*((uint64_t*)&target->chain[6]) = (uint64_t)(size_t)buf;
 					}
 				}
 				else if (type == __JUMPTARGET_JECXZ)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 3));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 3));
 					if ((diff >= -0x80) && (diff <= 0x7f))
 					{
 						target->chain[0] = 0x67;
 						target->chain[1] = 0xe3;
-						target->chain[2] = (uint8)diff;
+						target->chain[2] = (uint8_t)diff;
 						target->chain[3] = 0xeb;
 						target->chain[4] = 14;
-						*((uint32*)&target->chain[5]) = 0xcccccccc;
+						*((uint32_t*)&target->chain[5]) = 0xcccccccc;
 					}
 					else if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 					{
@@ -1257,7 +1276,7 @@ namespace asmx86
 						target->chain[3] = 0xeb;
 						target->chain[4] = 14;
 						target->chain[5] = 0xe9;
-						*((uint32*)&target->chain[6]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 10));
+						*((uint32_t*)&target->chain[6]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 10));
 					}
 					else
 					{
@@ -1268,20 +1287,20 @@ namespace asmx86
 						target->chain[4] = 14;
 						target->chain[5] = 0xff;
 						target->chain[6] = 0x25;
-						*((int32*)&target->chain[7]) = 0;
-						*((uint64*)&target->chain[11]) = (uint64)(size_t)buf;
+						*((int32_t*)&target->chain[7]) = 0;
+						*((uint64_t*)&target->chain[11]) = (uint64_t)(size_t)buf;
 					}
 				}
 				else if (type == __JUMPTARGET_JRCXZ)
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 2));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 2));
 					if ((diff >= -0x80) && (diff <= 0x7f))
 					{
 						target->chain[0] = 0xe3;
-						target->chain[1] = (uint8)diff;
+						target->chain[1] = (uint8_t)diff;
 						target->chain[2] = 0xeb;
 						target->chain[3] = 15;
-						*((uint64*)&target->chain[4]) = 0xccccccccccccccccLL;
+						*((uint64_t*)&target->chain[4]) = 0xccccccccccccccccLL;
 					}
 					else if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 					{
@@ -1290,7 +1309,7 @@ namespace asmx86
 						target->chain[2] = 0xeb;
 						target->chain[3] = 15;
 						target->chain[4] = 0xe9;
-						*((uint32*)&target->chain[5]) = (uint32)((size_t)buf - ((size_t)translatedPtr + 9));
+						*((uint32_t*)&target->chain[5]) = (uint32_t)((size_t)buf - ((size_t)translatedPtr + 9));
 					}
 					else
 					{
@@ -1300,30 +1319,30 @@ namespace asmx86
 						target->chain[3] = 15;
 						target->chain[4] = 0xff;
 						target->chain[5] = 0x25;
-						*((int32*)&target->chain[6]) = 0;
-						*((uint64*)&target->chain[10]) = (uint64)(size_t)buf;
+						*((int32_t*)&target->chain[6]) = 0;
+						*((uint64_t*)&target->chain[10]) = (uint64_t)(size_t)buf;
 					}
 				}
 				else
 				{
-					int64 diff = (int64)((size_t)buf - ((size_t)translatedPtr + 6));
+					int64_t diff = (int64_t)((size_t)buf - ((size_t)translatedPtr + 6));
 					if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 					{
 						target->chain[0] = 0x0f;
-						target->chain[1] = (uint8)(0x80 + type);
-						*((int32*)&target->chain[2]) = (int32)diff;
+						target->chain[1] = (uint8_t)(0x80 + type);
+						*((int32_t*)&target->chain[2]) = (int32_t)diff;
 						target->chain[6] = 0xeb;
 						target->chain[7] = 8;
-						*((uint16*)&target->chain[8]) = 0xcccc;
+						*((uint16_t*)&target->chain[8]) = 0xcccc;
 					}
 					else
 					{
-						target->chain[0] = (uint8)((0x70 + type) ^ 1);
+						target->chain[0] = (uint8_t)((0x70 + type) ^ 1);
 						target->chain[1] = 14;
 						target->chain[2] = 0xff;
 						target->chain[3] = 0x25;
-						*((int32*)&target->chain[4]) = 0;
-						*((uint64*)&target->chain[8]) = (uint64)(size_t)buf;
+						*((int32_t*)&target->chain[4]) = 0;
+						*((uint64_t*)&target->chain[8]) = (uint64_t)(size_t)buf;
 					}
 				}
 			}
@@ -1332,30 +1351,30 @@ namespace asmx86
 		target->addr = buf;
 	}
 
-	static __inline void __alwaysinline __PREFIX(add_label_ref) (JumpLabel* target, uint8* ref, __JumpTargetType type  __CGX86_ASSERT_PARAM_DECL)
+	static __inline void __alwaysinline __PREFIX(add_label_ref) (JumpLabel* target, uint8_t* ref, __JumpTargetType type  __CGX86_ASSERT_PARAM_DECL)
 	{
 		if (target->nearJump)
 		{
 			if (target->chain == NULL)
 			{
-				*(uint32*)ref = 0;
-				ref[4] = (uint8)type;
+				*(uint32_t*)ref = 0;
+				ref[4] = (uint8_t)type;
 				if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
 				{
-					*((uint32*)&ref[5]) = 0xcccccccc;
+					*((uint32_t*)&ref[5]) = 0xcccccccc;
 					ref[9] = 0xcc;
 				}
 				target->chain = ref;
 			}
 			else
 			{
-				int64 diff = (int64)((size_t)target->chain - (size_t)ref);
+				int64_t diff = (int64_t)((size_t)target->chain - (size_t)ref);
 				__CGX86_ASSERT((diff >= -0x80000000LL) && (diff <= 0x7fffffff), "Near label out of range");
-				*(int32*)ref = (int32)diff;
-				ref[4] = (uint8)type;
+				*(int32_t*)ref = (int32_t)diff;
+				ref[4] = (uint8_t)type;
 				if ((type == __JUMPTARGET_JCXZ) || (type == __JUMPTARGET_JECXZ))
 				{
-					*((uint32*)&ref[5]) = 0xcccccccc;
+					*((uint32_t*)&ref[5]) = 0xcccccccc;
 					ref[9] = 0xcc;
 				}
 				target->chain = ref;
@@ -1363,22 +1382,22 @@ namespace asmx86
 		}
 		else
 		{
-			*(uint64*)ref = (uint64)(size_t)target->chain;
-			ref[8] = (uint8)type;
+			*(uint64_t*)ref = (uint64_t)(size_t)target->chain;
+			ref[8] = (uint8_t)type;
 			if ((type == __JUMPTARGET_JECXZ) || (type == __JUMPTARGET_JRCXZ))
 			{
-				*((uint64*)&ref[9]) = 0xccccccccccccccccLL;
-				*((uint16*)&ref[17]) = 0xcccc;
+				*((uint64_t*)&ref[9]) = 0xccccccccccccccccLL;
+				*((uint16_t*)&ref[17]) = 0xcccc;
 			}
 			else if (type == __JUMPTARGET_ALWAYS)
 			{
-				*((uint32*)&ref[9]) = 0xcccccccc;
+				*((uint32_t*)&ref[9]) = 0xcccccccc;
 				ref[13] = 0xcc;
 			}
 			else
 			{
-				*((uint32*)&ref[9]) = 0xcccccccc;
-				*((uint16*)&ref[13]) = 0xcccc;
+				*((uint32_t*)&ref[9]) = 0xcccccccc;
+				*((uint16_t*)&ref[13]) = 0xcccc;
 				ref[15] = 0xcc;
 			}
 			target->chain = ref;
@@ -1400,21 +1419,21 @@ namespace asmx86
 
 #ifdef __CODEGENX86_32BIT
 
-	static __inline int __alwaysinline __MODRM(reg_need_rex) (uint8 reg, uint8 rm)
+	static __inline int __alwaysinline __MODRM(reg_need_rex) (uint8_t reg, uint8_t rm)
 	{
 		(void)reg;
 		(void)rm;
 		return 0;
 	}
 
-	static __inline uint8 __alwaysinline __MODRM(reg_get_rex) (uint8 reg, uint8 rm)
+	static __inline uint8_t __alwaysinline __MODRM(reg_get_rex) (uint8_t reg, uint8_t rm)
 	{
 		(void)reg;
 		(void)rm;
 		return 0;
 	}
 
-	static __inline int __alwaysinline __MODRM(mem_need_rex) (uint8 reg, __MEM_PARAM(m))
+	static __inline int __alwaysinline __MODRM(mem_need_rex) (uint8_t reg, __MEM_PARAM(m))
 	{
 		(void)reg;
 		(void)__MEM_BASE(m);
@@ -1424,7 +1443,7 @@ namespace asmx86
 		return 0;
 	}
 
-	static __inline uint8 __alwaysinline __MODRM(mem_get_rex) (uint8 reg, __MEM_PARAM(m))
+	static __inline uint8_t __alwaysinline __MODRM(mem_get_rex) (uint8_t reg, __MEM_PARAM(m))
 	{
 		(void)reg;
 		(void)__MEM_BASE(m);
@@ -1434,7 +1453,7 @@ namespace asmx86
 		return 0;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit_noindex) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m))
+	static __inline size_t __alwaysinline __MODRM(emit_noindex) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m))
 	{
 		__TRANSLATE_UNUSED
 		(void)__MEM_INDEX(m);
@@ -1443,7 +1462,7 @@ namespace asmx86
 		if (__MEM_BASE(m) == NONE)
 		{
 			__WRITE_BUF_8_ALWAYS(0, 0x05 | (reg << 3));
-			__WRITE_BUF_32_ALWAYS(1, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(1, (int32_t)__MEM_OFFSET(m));
 			return 5;
 		}
 		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP))
@@ -1453,20 +1472,20 @@ namespace asmx86
 		}
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 		{
-			__WRITE_BUF_8_8_ALWAYS(0, 0x40 | __reg32(__MEM_BASE(m)) | (reg << 3), (int8)__MEM_OFFSET(m));
+			__WRITE_BUF_8_8_ALWAYS(0, 0x40 | __reg32(__MEM_BASE(m)) | (reg << 3), (int8_t)__MEM_OFFSET(m));
 			return 2;
 		}
 		else
 		{
 			__WRITE_BUF_8_ALWAYS(0, 0x80 | __reg32(__MEM_BASE(m)) | (reg << 3));
-			__WRITE_BUF_32_ALWAYS(1, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(1, (int32_t)__MEM_OFFSET(m));
 			return 5;
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit_index) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m))
+	static __inline size_t __alwaysinline __MODRM(emit_index) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m))
 	{
-		uint8 scaleBits;
+		uint8_t scaleBits;
 
 		__TRANSLATE_UNUSED
 		(void)wr;
@@ -1488,7 +1507,7 @@ namespace asmx86
 		if (__MEM_BASE(m) == NONE)
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x04 | (reg << 3), 0x05 | (__reg32(__MEM_INDEX(m)) << 3) | scaleBits);
-			__WRITE_BUF_32_ALWAYS(2, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(2, (int32_t)__MEM_OFFSET(m));
 			return 6;
 		}
 		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP))
@@ -1499,13 +1518,13 @@ namespace asmx86
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x44 | (reg << 3), __reg32(__MEM_BASE(m)) | (__reg32(__MEM_INDEX(m)) << 3) | scaleBits);
-			__WRITE_BUF_8_ALWAYS(2, (int8)__MEM_OFFSET(m));
+			__WRITE_BUF_8_ALWAYS(2, (int8_t)__MEM_OFFSET(m));
 			return 3;
 		}
 		else
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x84 | (reg << 3), __reg32(__MEM_BASE(m)) | (__reg32(__MEM_INDEX(m)) << 3) | scaleBits);
-			__WRITE_BUF_32_ALWAYS(2, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(2, (int32_t)__MEM_OFFSET(m));
 			return 6;
 		}
 	}
@@ -1538,7 +1557,7 @@ namespace asmx86
 			return 6;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(emit) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		__TRANSLATE_UNUSED
 		(void)immsz;
@@ -1560,18 +1579,18 @@ namespace asmx86
 
 #else // __CODEGENX86_64BIT
 
-	static __inline int __alwaysinline __MODRM(reg_need_rex) (uint8 reg, uint8 rm)
+	static __inline int __alwaysinline __MODRM(reg_need_rex) (uint8_t reg, uint8_t rm)
 	{
 		// Must use >= 8 here instead of & 8, see __reg8_64bit function
 		return (reg >= 8) || (rm >= 8);
 	}
 
-	static __inline uint8 __alwaysinline __MODRM(reg_get_rex) (uint8 reg, uint8 rm)
+	static __inline uint8_t __alwaysinline __MODRM(reg_get_rex) (uint8_t reg, uint8_t rm)
 	{
 		return __REX(__REX_REG(reg) | __REX_RM(rm));
 	}
 
-	static __inline int __alwaysinline __MODRM(mem_need_rex) (uint8 reg, __MEM_PARAM(m))
+	static __inline int __alwaysinline __MODRM(mem_need_rex) (uint8_t reg, __MEM_PARAM(m))
 	{
 		(void)__MEM_SCALE(m);
 		(void)__MEM_OFFSET(m);
@@ -1579,9 +1598,9 @@ namespace asmx86
 		return (reg >= 8) || (__MEM_BASE(m) >= REG_R8) || (__MEM_INDEX(m) >= REG_R8);
 	}
 
-	static __inline uint8 __alwaysinline __MODRM(mem_get_rex) (uint8 reg, __MEM_PARAM(m))
+	static __inline uint8_t __alwaysinline __MODRM(mem_get_rex) (uint8_t reg, __MEM_PARAM(m))
 	{
-		uint8 rex = __REX(__REX_REG(reg));
+		uint8_t rex = __REX(__REX_REG(reg));
 		(void)__MEM_SCALE(m);
 		(void)__MEM_OFFSET(m);
 		if (__MEM_BASE(m) != NONE)
@@ -1591,49 +1610,55 @@ namespace asmx86
 		return rex;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit_noindex) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(emit_noindex) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		(void)wr;
 		(void)__MEM_INDEX(m);
 		(void)__MEM_SCALE(m);
 		if (__MEM_BASE(m) == NONE)
 		{
-			int64 diff = (int64)(size_t)__MEM_OFFSET(m) - (int64)((size_t)__EXEC_OFFSET(5 + immsz));
+			int64_t diff = (int64_t)(size_t)__MEM_OFFSET(m) - (int64_t)((size_t)__EXEC_OFFSET(5 + immsz));
 			if ((diff >= -0x80000000LL) && (diff < 0x7fffffffLL))
 			{
 				__WRITE_BUF_8_ALWAYS(0, 0x05 | ((reg & 7) << 3));
-				__WRITE_BUF_32_ALWAYS(1, (int32)diff);
+				__WRITE_BUF_32_ALWAYS(1, (int32_t)diff);
 				return 5;
 			}
 			else
 			{
-				__CGX86_ASSERT(((uint64)__MEM_OFFSET(m)) < 0x100000000LL, "Memory address out of range");
+				__CGX86_ASSERT(((uint64_t)__MEM_OFFSET(m)) < 0x100000000LL, "Memory address out of range");
 				__WRITE_BUF_8_8_ALWAYS(0, 0x04 | ((reg & 7) << 3), 0x25);
-				__WRITE_BUF_32_ALWAYS(2, (int32)__MEM_OFFSET(m));
+				__WRITE_BUF_32_ALWAYS(2, (int32_t)__MEM_OFFSET(m));
 				return 6;
 			}
 		}
-		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP) && (__MEM_BASE(m) != REG_R13))
+		else if (__MEM_BASE(m) == REG_RIP)
+		{
+			__WRITE_BUF_8_ALWAYS(0, 0x05 | ((reg & 7) << 3));
+			__WRITE_BUF_32_ALWAYS(1, (int32_t)__MEM_OFFSET(m));
+			return 5;
+		}
+		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_RBP) && (__MEM_BASE(m) != REG_R13))
 		{
 			__WRITE_BUF_8_ALWAYS(0, (__reg64(__MEM_BASE(m)) & 7) | ((reg & 7) << 3));
 			return 1;
 		}
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 		{
-			__WRITE_BUF_8_8_ALWAYS(0, 0x40 | (__reg64(__MEM_BASE(m)) & 7) | ((reg & 7) << 3), (int8)__MEM_OFFSET(m));
+			__WRITE_BUF_8_8_ALWAYS(0, 0x40 | (__reg64(__MEM_BASE(m)) & 7) | ((reg & 7) << 3), (int8_t)__MEM_OFFSET(m));
 			return 2;
 		}
 		else
 		{
 			__WRITE_BUF_8_ALWAYS(0, 0x80 | (__reg64(__MEM_BASE(m)) & 7) | ((reg & 7) << 3));
-			__WRITE_BUF_32_ALWAYS(1, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(1, (int32_t)__MEM_OFFSET(m));
 			return 5;
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit_index) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m))
+	static __inline size_t __alwaysinline __MODRM(emit_index) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m))
 	{
-		uint8 scaleBits;
+		uint8_t scaleBits;
 
 		__TRANSLATE_UNUSED
 		(void)wr;
@@ -1648,9 +1673,9 @@ namespace asmx86
 		else
 			scaleBits = 0xc0;
 
-		__CGX86_ASSERT(__MEM_INDEX(m) != REG_ESP, "ESP cannot be used as an index in address computation");
+		__CGX86_ASSERT(__MEM_INDEX(m) != REG_RSP, "RSP cannot be used as an index in address computation");
 		if (__MEM_INDEX(m) == NONE)
-			__MEM_INDEX(m) = REG_ESP; // No index takes place of ESP as index
+			__MEM_INDEX(m) = REG_RSP; // No index takes place of ESP as index
 
 #ifdef __x86_64__
 		__CGX86_ASSERT(((__MEM_OFFSET(m)) >= -0x80000000LL) && ((__MEM_OFFSET(m)) <= 0x7fffffffLL), "Offset out of range");
@@ -1658,10 +1683,10 @@ namespace asmx86
 		if (__MEM_BASE(m) == NONE)
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x04 | ((reg & 7) << 3), 0x05 | ((__reg64(__MEM_INDEX(m)) & 7) << 3) | scaleBits);
-			__WRITE_BUF_32_ALWAYS(2, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(2, (int32_t)__MEM_OFFSET(m));
 			return 6;
 		}
-		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP) && (__MEM_BASE(m) != REG_R13))
+		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_RBP) && (__MEM_BASE(m) != REG_R13))
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x04 | ((reg & 7) << 3), (__reg64(__MEM_BASE(m)) & 7) | ((__reg64(__MEM_INDEX(m)) & 7) << 3) | scaleBits);
 			return 2;
@@ -1669,13 +1694,13 @@ namespace asmx86
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x44 | ((reg & 7) << 3), (__reg64(__MEM_BASE(m)) & 7) | ((__reg64(__MEM_INDEX(m)) & 7) << 3) | scaleBits);
-			__WRITE_BUF_8_ALWAYS(2, (int8)__MEM_OFFSET(m));
+			__WRITE_BUF_8_ALWAYS(2, (int8_t)__MEM_OFFSET(m));
 			return 3;
 		}
 		else
 		{
 			__WRITE_BUF_8_8_ALWAYS(0, 0x84 | ((reg & 7) << 3), (__reg64(__MEM_BASE(m)) & 7) | ((__reg64(__MEM_INDEX(m)) & 7) << 3) | scaleBits);
-			__WRITE_BUF_32_ALWAYS(2, (int32)__MEM_OFFSET(m));
+			__WRITE_BUF_32_ALWAYS(2, (int32_t)__MEM_OFFSET(m));
 			return 6;
 		}
 	}
@@ -1686,7 +1711,9 @@ namespace asmx86
 		(void)__MEM_SCALE(m);
 		if (__MEM_BASE(m) == NONE)
 			return 6;
-		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP) && (__MEM_BASE(m) != REG_R13))
+		else if (__MEM_BASE(m) == REG_RIP)
+			return 5;
+		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_RBP) && (__MEM_BASE(m) != REG_R13))
 			return 1;
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 			return 2;
@@ -1700,7 +1727,7 @@ namespace asmx86
 		(void)__MEM_SCALE(m);
 		if (__MEM_BASE(m) == NONE)
 			return 6;
-		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_EBP) && (__MEM_BASE(m) != REG_R13))
+		else if ((__MEM_OFFSET(m) == 0) && (__MEM_BASE(m) != REG_RBP) && (__MEM_BASE(m) != REG_R13))
 			return 2;
 		else if ((__MEM_OFFSET(m) >= -0x80) && (__MEM_OFFSET(m) <= 0x7f))
 			return 3;
@@ -1708,20 +1735,20 @@ namespace asmx86
 			return 6;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(emit) (__CONTEXT_PARAMS, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(emit) (__CONTEXT_PARAMS, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (wr)
 		{
-			if ((__MEM_INDEX(m) == NONE) && (__MEM_BASE(m) != REG_ESP) && (__MEM_BASE(m) != REG_R12))
+			if ((__MEM_INDEX(m) == NONE) && (__MEM_BASE(m) != REG_RSP) && (__MEM_BASE(m) != REG_R12))
 				return __MODRM(emit_noindex) (__CONTEXT, reg, __MEMOP(m), immsz);
-			else // Index present or base of ESP/R12
+			else // Index present or base of RSP/R12
 				return __MODRM(emit_index) (__CONTEXT, reg, __MEMOP(m));
 		}
 		else
 		{
-			if ((__MEM_INDEX(m) == NONE) && (__MEM_BASE(m) != REG_ESP) && (__MEM_BASE(m) != REG_R12))
+			if ((__MEM_INDEX(m) == NONE) && (__MEM_BASE(m) != REG_RSP) && (__MEM_BASE(m) != REG_R12))
 				return __MODRM(emit_noindex_lenonly) (__MEMOP(m));
-			else // Index present or base of ESP/R12
+			else // Index present or base of RSP/R12
 				return __MODRM(emit_index_lenonly) (__MEMOP(m));
 		}
 	}
@@ -1730,7 +1757,7 @@ namespace asmx86
 
 #define __ASSERT_NO_INVALID_8BIT_COMBO __CGX86_ASSERT(!(((a >= 20) && (a <= 23) && (b >= 24)) || ((b >= 20) && (b <= 23) && (a >= 24))), "AH/CH/DH/BH registers cannot be used at the same time as SPL/BPL/SIL/DIL/R8B-R15B");
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__ASSERT_NO_INVALID_8BIT_COMBO
@@ -1747,7 +1774,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
 		{
@@ -1761,7 +1788,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__ASSERT_NO_INVALID_8BIT_COMBO
@@ -1778,7 +1805,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
 		{
@@ -1793,77 +1820,77 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int16 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int16_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int16 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int16_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte) (__CONTEXT, op, grp, __MEMOP(m), 2);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm32) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int32 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_imm32) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int32_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_32(ofs, imm);
 		return ofs + 4;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm32) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int32 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_imm32) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int32_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte) (__CONTEXT, op, grp, __MEMOP(m), 4);
 		__WRITE_BUF_32(ofs, imm);
 		return ofs + 4;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte_opsz) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte_opsz) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int16 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte_opsz_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int16_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte_opsz) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int16 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte_opsz_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int16_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte_opsz) (__CONTEXT, op, grp, __MEMOP(m), 2);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__ASSERT_NO_INVALID_8BIT_COMBO
@@ -1880,7 +1907,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
 		{
@@ -1895,21 +1922,21 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_twobyte) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_twobyte) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte_opsz) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte_opsz) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__ASSERT_NO_INVALID_8BIT_COMBO
@@ -1926,7 +1953,7 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte_opsz) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte_opsz) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
 		{
@@ -1941,14 +1968,14 @@ namespace asmx86
 		}
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte_opsz_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte_opsz_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_twobyte_opsz) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte_opsz_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte_opsz_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_twobyte_opsz) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
@@ -1956,7 +1983,7 @@ namespace asmx86
 	}
 
 #ifdef __CODEGENX86_64BIT
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte64) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte64) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__WRITE_BUF_8_8(0, __MODRM(reg_get_rex) (a, b) | __REX_64, op);
@@ -1964,76 +1991,76 @@ namespace asmx86
 		return 3;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte64) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte64) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		__WRITE_BUF_8_8(0, __MODRM(mem_get_rex) (reg, __MEMOP(m)) | __REX_64, op);
 		return __MODRM(emit) (__CONTEXT_OFFSET(2), reg, __MEMOP(m), immsz) + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte64) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte64) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int16 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int16_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte64) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm16) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int16 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm16) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int16_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte64) (__CONTEXT, op, grp, __MEMOP(m), 2);
 		__WRITE_BUF_16(ofs, imm);
 		return ofs + 2;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm32) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int32 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_onebyte64_imm32) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int32_t imm)
 	{
 		size_t ofs = __MODRM(reg_onebyte64) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_32(ofs, imm);
 		return ofs + 4;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm32) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int32 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_onebyte64_imm32) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int32_t imm)
 	{
 		size_t ofs = __MODRM(mem_onebyte64) (__CONTEXT, op, grp, __MEMOP(m), 4);
 		__WRITE_BUF_32(ofs, imm);
 		return ofs + 4;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte64) (__CONTEXT_PARAMS, uint8 op, uint8 a, uint8 b)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte64) (__CONTEXT_PARAMS, uint8_t op, uint8_t a, uint8_t b)
 	{
 		__TRANSLATE_UNUSED
 		__WRITE_BUF_8_8_8_8(0, __MODRM(reg_get_rex) (a, b) | __REX_64, 0x0f, op, 0xc0 | ((a & 7) << 3) | (b & 7));
 		return 4;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte64) (__CONTEXT_PARAMS, uint8 op, uint8 reg, __MEM_PARAM(m), uint8 immsz)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte64) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		__WRITE_BUF_8_8(0, __MODRM(mem_get_rex) (reg, __MEMOP(m)) | __REX_64, 0x0f);
 		__WRITE_BUF_8(2, op);
 		return __MODRM(emit) (__CONTEXT_OFFSET(3), reg, __MEMOP(m), immsz) + 3;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(reg_twobyte64_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, uint8 a, int8 imm)
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte64_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
 	{
 		size_t ofs = __MODRM(reg_twobyte64) (__CONTEXT, op, grp, a);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
 
-	static __inline size_t __alwaysinline __MODRM(mem_twobyte64_imm8) (__CONTEXT_PARAMS, uint8 op, uint8 grp, __MEM_PARAM(m), int8 imm)
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte64_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_twobyte64) (__CONTEXT, op, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
@@ -2048,17 +2075,17 @@ namespace asmx86
 	{
 #ifdef __CODEGENX86_32BIT
 		__WRITE_BUF_8(0, 0xe8);
-		__WRITE_BUF_32(1, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(5))));
+		__WRITE_BUF_32(1, (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(5))));
 		return 5;
 #else
-		int64 diff;
+		int64_t diff;
 		if (!wr)
 			return 16;
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(5)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(5)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8(0, 0xe8);
-			__WRITE_BUF_32(1, (int32)diff);
+			__WRITE_BUF_32(1, (int32_t)diff);
 			return 5;
 		}
 		else
@@ -2066,7 +2093,7 @@ namespace asmx86
 			__WRITE_BUF_8_8(0, 0xff, 0x15);
 			__WRITE_BUF_32(2, 2);
 			__WRITE_BUF_8_8(6, 0xeb, 8);
-			__WRITE_BUF_64(8, (uint64)(size_t)a);
+			__WRITE_BUF_64(8, (uint64_t)(size_t)a);
 			return 16;
 		}
 #endif
@@ -2076,24 +2103,24 @@ namespace asmx86
 	{
 #ifdef __CODEGENX86_32BIT
 		__WRITE_BUF_8(0, 0xe9);
-		__WRITE_BUF_32(1, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(5))));
+		__WRITE_BUF_32(1, (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(5))));
 		return 5;
 #else
-		int64 diff;
+		int64_t diff;
 		if (!wr)
 			return 14;
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(5)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(5)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8(0, 0xe9);
-			__WRITE_BUF_32(1, (int32)diff);
+			__WRITE_BUF_32(1, (int32_t)diff);
 			return 5;
 		}
 		else
 		{
 			__WRITE_BUF_8_8(0, 0xff, 0x25);
 			__WRITE_BUF_32(2, 0);
-			__WRITE_BUF_64(6, (uint64)(size_t)a);
+			__WRITE_BUF_64(6, (uint64_t)(size_t)a);
 			return 14;
 		}
 #endif
@@ -2108,54 +2135,54 @@ namespace asmx86
 		return a->nearJump ? __FORWARD_REF_NEAR_JUMP_SIZE : __FORWARD_REF_JUMP_SIZE;
 	}
 
-	__DEF_INSTR_1_ARG(condjmp, p, __PTR, uint8 cond)
+	__DEF_INSTR_1_ARG(condjmp, p, __PTR, uint8_t cond)
 	{
 #ifdef __CODEGENX86_32BIT
-		int32 diff;
+		int32_t diff;
 		if (!wr)
 			return 6;
-		diff = (int32)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		diff = (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8(0, 0x70 + cond);
-			__WRITE_BUF_8(1, (int8)diff);
+			__WRITE_BUF_8(1, (int8_t)diff);
 			return 2;
 		}
 		else
 		{
 			__WRITE_BUF_8_8(0, 0x0f, 0x80 + cond);
-			__WRITE_BUF_32(2, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(6))));
+			__WRITE_BUF_32(2, (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(6))));
 			return 6;
 		}
 #else
-		int64 diff;
+		int64_t diff;
 		if (!wr)
 			return 16;
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8(0, 0x70 + cond);
-			__WRITE_BUF_8(1, (int8)diff);
+			__WRITE_BUF_8(1, (int8_t)diff);
 			return 2;
 		}
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(6)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(6)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8_8(0, 0x0f, 0x80 + cond);
-			__WRITE_BUF_32(2, (int32)diff);
+			__WRITE_BUF_32(2, (int32_t)diff);
 			return 6;
 		}
 		else
 		{
 			__WRITE_BUF_8_8_8_8(0, (0x70 + cond) ^ 1, 14, 0xff, 0x25);
 			__WRITE_BUF_32(4, 0);
-			__WRITE_BUF_64(8, (uint64)(size_t)a);
+			__WRITE_BUF_64(8, (uint64_t)(size_t)a);
 			return 16;
 		}
 #endif
 	}
 
-	__DEF_INSTR_1_ARG(condjmp, t, __TARGET, uint8 cond)
+	__DEF_INSTR_1_ARG(condjmp, t, __TARGET, uint8_t cond)
 	{
 		if (a->addr != 0)
 			return __NAME(condjmp, p) (__CONTEXT, cond, a->addr);
@@ -2167,21 +2194,21 @@ namespace asmx86
 #ifdef __CODEGENX86_32BIT
 	__DEF_INSTR_1(jcxz, p, __PTR)
 	{
-		int32 diff;
+		int32_t diff;
 		if (!wr)
 			return 10;
-		diff = (int32)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
+		diff = (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8_8(0, 0x67, 0xe3);
-			__WRITE_BUF_8(2, (int8)diff);
+			__WRITE_BUF_8(2, (int8_t)diff);
 			return 3;
 		}
 		else
 		{
 			__WRITE_BUF_8_8_8_8(0, 0x67, 0xe3, 2, 0xeb);
 			__WRITE_BUF_8_8(4, 5, 0xe9);
-			__WRITE_BUF_32(6, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(10))));
+			__WRITE_BUF_32(6, (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(10))));
 			return 10;
 		}
 	}
@@ -2199,40 +2226,40 @@ namespace asmx86
 	__DEF_INSTR_1(jecxz, p, __PTR)
 	{
 #ifdef __CODEGENX86_32BIT
-		int32 diff;
+		int32_t diff;
 		if (!wr)
 			return 9;
-		diff = (int32)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		diff = (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8(0, 0xe3);
-			__WRITE_BUF_8(1, (int8)diff);
+			__WRITE_BUF_8(1, (int8_t)diff);
 			return 2;
 		}
 		else
 		{
 			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 5);
 			__WRITE_BUF_8(4, 0xe9);
-			__WRITE_BUF_32(5, (int32)((size_t)a - ((size_t)__EXEC_OFFSET(9))));
+			__WRITE_BUF_32(5, (int32_t)((size_t)a - ((size_t)__EXEC_OFFSET(9))));
 			return 9;
 		}
 #else
-		int64 diff;
+		int64_t diff;
 		if (!wr)
 			return 19;
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(3)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8_8(0, 0x67, 0xe3);
-			__WRITE_BUF_8(2, (int8)diff);
+			__WRITE_BUF_8(2, (int8_t)diff);
 			return 3;
 		}
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(10)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(10)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8_8_8_8(0, 0x67, 0xe3, 2, 0xeb);
 			__WRITE_BUF_8_8(4, 5, 0xe9);
-			__WRITE_BUF_32(6, (int32)diff);
+			__WRITE_BUF_32(6, (int32_t)diff);
 			return 10;
 		}
 		else
@@ -2241,7 +2268,7 @@ namespace asmx86
 			__WRITE_BUF_8_8(4, 14, 0xff);
 			__WRITE_BUF_8(6, 0x25);
 			__WRITE_BUF_32(7, 0);
-			__WRITE_BUF_64(11, (uint64)(size_t)a);
+			__WRITE_BUF_64(11, (uint64_t)(size_t)a);
 			return 19;
 		}
 #endif
@@ -2259,22 +2286,22 @@ namespace asmx86
 #ifdef __CODEGENX86_64BIT
 	__DEF_INSTR_1(jrcxz, p, __PTR)
 	{
-		int64 diff;
+		int64_t diff;
 		if (!wr)
 			return 18;
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(2)));
 		if ((diff >= -0x80) && (diff <= 0x7f))
 		{
 			__WRITE_BUF_8(0, 0xe3);
-			__WRITE_BUF_8(1, (int8)diff);
+			__WRITE_BUF_8(1, (int8_t)diff);
 			return 2;
 		}
-		diff = (int64)((size_t)a - ((size_t)__EXEC_OFFSET(9)));
+		diff = (int64_t)((size_t)a - ((size_t)__EXEC_OFFSET(9)));
 		if ((diff >= -0x80000000LL) && (diff <= 0x7fffffffLL))
 		{
 			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 5);
 			__WRITE_BUF_8(4, 0xe9);
-			__WRITE_BUF_32(5, (int32)diff);
+			__WRITE_BUF_32(5, (int32_t)diff);
 			return 9;
 		}
 		else
@@ -2282,7 +2309,7 @@ namespace asmx86
 			__WRITE_BUF_8_8_8_8(0, 0xe3, 2, 0xeb, 14);
 			__WRITE_BUF_8_8(4, 0xff, 0x25);
 			__WRITE_BUF_32(6, 0);
-			__WRITE_BUF_64(10, (uint64)(size_t)a);
+			__WRITE_BUF_64(10, (uint64_t)(size_t)a);
 			return 18;
 		}
 	}
@@ -2346,10 +2373,10 @@ namespace asmx86
 
 
 	// Conditional move instructions
-	__DEF_INSTR_2_ARG(condmov_16, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __reg16(b)); }
-	__DEF_INSTR_2_ARG(condmov_16, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(condmov_32, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __reg32(b)); }
-	__DEF_INSTR_2_ARG(condmov_32, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(condmov_16, rr, __REG, __REG, uint8_t cond) { return __MODRM(reg_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __reg16(b)); }
+	__DEF_INSTR_2_ARG(condmov_16, rm, __REG, __MEM, uint8_t cond) { return __MODRM(mem_twobyte_opsz) (__CONTEXT, 0x40 + cond, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(condmov_32, rr, __REG, __REG, uint8_t cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __reg32(b)); }
+	__DEF_INSTR_2_ARG(condmov_32, rm, __REG, __MEM, uint8_t cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x40 + cond, __reg32(a), __MEMOP(b), 0); }
 
 #define __CONDMOV_INSTR(n, cond) \
 	__DEF_INSTR_2(n ## _16, rr, __REG, __REG) { return __NAME(condmov_16, rr) (__CONTEXT, cond, a, b); } \
@@ -2389,8 +2416,8 @@ namespace asmx86
 	__CONDMOV_INSTR(cmovnle, 15)
 
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2_ARG(condmov_64, rr, __REG, __REG, uint8 cond) { return __MODRM(reg_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __reg64(b)); }
-	__DEF_INSTR_2_ARG(condmov_64, rm, __REG, __MEM, uint8 cond) { return __MODRM(mem_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(condmov_64, rr, __REG, __REG, uint8_t cond) { return __MODRM(reg_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __reg64(b)); }
+	__DEF_INSTR_2_ARG(condmov_64, rm, __REG, __MEM, uint8_t cond) { return __MODRM(mem_twobyte64) (__CONTEXT, 0x40 + cond, __reg64(a), __MEMOP(b), 0); }
 
 #define __CONDMOV_INSTR_64(n, cond) \
 	__DEF_INSTR_2(n ## _64, rr, __REG, __REG) { return __NAME(condmov_64, rr) (__CONTEXT, cond, a, b); } \
@@ -2431,8 +2458,8 @@ namespace asmx86
 
 
 	// Set to condition instructions
-	__DEF_INSTR_1_ARG(setcond, r, __REG, uint8 cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x90 + cond, 0, __reg8(a)); }
-	__DEF_INSTR_1_ARG(setcond, m, __MEM, uint8 cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x90 + cond, 0, __MEMOP(a), 0); }
+	__DEF_INSTR_1_ARG(setcond, r, __REG, uint8_t cond) { return __MODRM(reg_twobyte) (__CONTEXT, 0x90 + cond, 0, __reg8(a)); }
+	__DEF_INSTR_1_ARG(setcond, m, __MEM, uint8_t cond) { return __MODRM(mem_twobyte) (__CONTEXT, 0x90 + cond, 0, __MEMOP(a), 0); }
 
 #define __SETCOND_INSTR(n, cond) \
 	__DEF_INSTR_1(n, r, __REG) { return __NAME(setcond, r) (__CONTEXT, cond, a); } \
@@ -2471,75 +2498,75 @@ namespace asmx86
 
 
 	// ALU instructions
-	__DEF_INSTR_2_ARG(alu_8, rr, __REG, __REG, uint8 op) { return __MODRM(reg_onebyte) (__CONTEXT, (op << 3) + 2, __reg8(a), __reg8(b)); }
-	__DEF_INSTR_2_ARG(alu_8, rm, __REG, __MEM, uint8 op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 2, __reg8(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(alu_8, mr, __MEM, __REG, uint8 op) { return __MODRM(mem_onebyte) (__CONTEXT, op << 3, __reg8(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2_ARG(alu_8, mi, __MEM, __IMM8, uint8 op) { return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x80, op, __MEMOP(a), b); }
-	__DEF_INSTR_2_ARG(alu_16, rr, __REG, __REG, uint8 op) { return __MODRM(reg_onebyte_opsz) (__CONTEXT, (op << 3) + 3, __reg16(a), __reg16(b)); }
-	__DEF_INSTR_2_ARG(alu_16, rm, __REG, __MEM, uint8 op) { return __MODRM(mem_onebyte_opsz) (__CONTEXT, (op << 3) + 3, __reg16(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(alu_16, mr, __MEM, __REG, uint8 op) { return __MODRM(mem_onebyte_opsz) (__CONTEXT, (op << 3) + 1, __reg16(b), __MEMOP(a), 0); }
-	__DEF_INSTR_2_ARG(alu_32, rr, __REG, __REG, uint8 op) { return __MODRM(reg_onebyte) (__CONTEXT, (op << 3) + 3, __reg32(a), __reg32(b)); }
-	__DEF_INSTR_2_ARG(alu_32, rm, __REG, __MEM, uint8 op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 3, __reg32(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(alu_32, mr, __MEM, __REG, uint8 op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 1, __reg32(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(alu_8, rr, __REG, __REG, uint8_t op) { return __MODRM(reg_onebyte) (__CONTEXT, (op << 3) + 2, __reg8(a), __reg8(b)); }
+	__DEF_INSTR_2_ARG(alu_8, rm, __REG, __MEM, uint8_t op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 2, __reg8(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(alu_8, mr, __MEM, __REG, uint8_t op) { return __MODRM(mem_onebyte) (__CONTEXT, op << 3, __reg8(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(alu_8, mi, __MEM, __IMM8, uint8_t op) { return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x80, op, __MEMOP(a), b); }
+	__DEF_INSTR_2_ARG(alu_16, rr, __REG, __REG, uint8_t op) { return __MODRM(reg_onebyte_opsz) (__CONTEXT, (op << 3) + 3, __reg16(a), __reg16(b)); }
+	__DEF_INSTR_2_ARG(alu_16, rm, __REG, __MEM, uint8_t op) { return __MODRM(mem_onebyte_opsz) (__CONTEXT, (op << 3) + 3, __reg16(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(alu_16, mr, __MEM, __REG, uint8_t op) { return __MODRM(mem_onebyte_opsz) (__CONTEXT, (op << 3) + 1, __reg16(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(alu_32, rr, __REG, __REG, uint8_t op) { return __MODRM(reg_onebyte) (__CONTEXT, (op << 3) + 3, __reg32(a), __reg32(b)); }
+	__DEF_INSTR_2_ARG(alu_32, rm, __REG, __MEM, uint8_t op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 3, __reg32(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(alu_32, mr, __MEM, __REG, uint8_t op) { return __MODRM(mem_onebyte) (__CONTEXT, (op << 3) + 1, __reg32(b), __MEMOP(a), 0); }
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2_ARG(alu_64, rr, __REG, __REG, uint8 op) { return __MODRM(reg_onebyte64) (__CONTEXT, (op << 3) + 3, __reg64(a), __reg64(b)); }
-	__DEF_INSTR_2_ARG(alu_64, rm, __REG, __MEM, uint8 op) { return __MODRM(mem_onebyte64) (__CONTEXT, (op << 3) + 3, __reg64(a), __MEMOP(b), 0); }
-	__DEF_INSTR_2_ARG(alu_64, mr, __MEM, __REG, uint8 op) { return __MODRM(mem_onebyte64) (__CONTEXT, (op << 3) + 1, __reg64(b), __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(alu_64, rr, __REG, __REG, uint8_t op) { return __MODRM(reg_onebyte64) (__CONTEXT, (op << 3) + 3, __reg64(a), __reg64(b)); }
+	__DEF_INSTR_2_ARG(alu_64, rm, __REG, __MEM, uint8_t op) { return __MODRM(mem_onebyte64) (__CONTEXT, (op << 3) + 3, __reg64(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2_ARG(alu_64, mr, __MEM, __REG, uint8_t op) { return __MODRM(mem_onebyte64) (__CONTEXT, (op << 3) + 1, __reg64(b), __MEMOP(a), 0); }
 #endif
 
-	__DEF_INSTR_2_ARG(alu_8, ri, __REG, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(alu_8, ri, __REG, __IMM8, uint8_t op)
 	{
 		if (a == REG_AL)
 			return __onebyte_imm8(__CONTEXT, (op << 3) + 4, b);
 		return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0x80, op, __reg8(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(alu_16, ri, __REG, __IMM16, uint8 op)
+	__DEF_INSTR_2_ARG(alu_16, ri, __REG, __IMM16, uint8_t op)
 	{
 		if (a == REG_AX)
 			return __onebyte_opsz_imm16(__CONTEXT, (op << 3) + 5, b);
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT, 0x83, op, __reg16(a), (int8)b);
+			return __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT, 0x83, op, __reg16(a), (int8_t)b);
 		return __MODRM(reg_onebyte_opsz_imm16) (__CONTEXT, 0x81, op, __reg16(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(alu_16, mi, __MEM, __IMM16, uint8 op)
+	__DEF_INSTR_2_ARG(alu_16, mi, __MEM, __IMM16, uint8_t op)
 	{
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8)b);
+			return __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8_t)b);
 		return __MODRM(mem_onebyte_opsz_imm16) (__CONTEXT, 0x81, op, __MEMOP(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(alu_32, ri, __REG, __IMM32, uint8 op)
+	__DEF_INSTR_2_ARG(alu_32, ri, __REG, __IMM32, uint8_t op)
 	{
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0x83, op, __reg32(a), (int8)b);
+			return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0x83, op, __reg32(a), (int8_t)b);
 		if (a == REG_EAX)
 			return __onebyte_imm32(__CONTEXT, (op << 3) + 5, b);
 		return __MODRM(reg_onebyte_imm32) (__CONTEXT, 0x81, op, __reg32(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(alu_32, mi, __MEM, __IMM32, uint8 op)
+	__DEF_INSTR_2_ARG(alu_32, mi, __MEM, __IMM32, uint8_t op)
 	{
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8)b);
+			return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8_t)b);
 		return __MODRM(mem_onebyte_imm32) (__CONTEXT, 0x81, op, __MEMOP(a), b);
 	}
 
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2_ARG(alu_64, ri, __REG, __IMM32, uint8 op)
+	__DEF_INSTR_2_ARG(alu_64, ri, __REG, __IMM32, uint8_t op)
 	{
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(reg_onebyte64_imm8) (__CONTEXT, 0x83, op, __reg64(a), (int8)b);
+			return __MODRM(reg_onebyte64_imm8) (__CONTEXT, 0x83, op, __reg64(a), (int8_t)b);
 		if (a == REG_RAX)
 			return __onebyte64_imm32(__CONTEXT, (op << 3) + 5, b);
 		return __MODRM(reg_onebyte64_imm32) (__CONTEXT, 0x81, op, __reg64(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(alu_64, mi, __MEM, __IMM32, uint8 op)
+	__DEF_INSTR_2_ARG(alu_64, mi, __MEM, __IMM32, uint8_t op)
 	{
 		if ((b >= -0x80) && (b <= 0x7f))
-			return __MODRM(mem_onebyte64_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8)b);
+			return __MODRM(mem_onebyte64_imm8) (__CONTEXT, 0x83, op, __MEMOP(a), (int8_t)b);
 		return __MODRM(mem_onebyte64_imm32) (__CONTEXT, 0x81, op, __MEMOP(a), b);
 	}
 #endif
@@ -2624,7 +2651,7 @@ namespace asmx86
 	__DEF_INSTR_1(push, i, __IMM32)
 	{
 		if ((a >= -0x80) && (a <= 0x7f))
-			return __onebyte_imm8(__CONTEXT, 0x6a, (int8)a);
+			return __onebyte_imm8(__CONTEXT, 0x6a, (int8_t)a);
 		return __onebyte_imm32(__CONTEXT, 0x68, a);
 	}
 
@@ -2693,28 +2720,28 @@ namespace asmx86
 	__DEF_INSTR_3(imul_16, rri, __REG, __REG, __IMM16)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT, 0x6b, __reg16(a), __reg16(b), (int8)c);
+			return __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT, 0x6b, __reg16(a), __reg16(b), (int8_t)c);
 		return __MODRM(reg_onebyte_opsz_imm16) (__CONTEXT, 0x69, __reg16(a), __reg16(b), c);
 	}
 
 	__DEF_INSTR_3(imul_16, rmi, __REG, __MEM, __IMM16)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT, 0x6b, __reg16(a), __MEMOP(b), (int8)c);
+			return __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT, 0x6b, __reg16(a), __MEMOP(b), (int8_t)c);
 		return __MODRM(mem_onebyte_opsz_imm16) (__CONTEXT, 0x69, __reg16(a), __MEMOP(b), c);
 	}
 
 	__DEF_INSTR_3(imul_32, rri, __REG, __REG, __IMM32)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0x6b, __reg32(a), __reg32(b), (int8)c);
+			return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0x6b, __reg32(a), __reg32(b), (int8_t)c);
 		return __MODRM(reg_onebyte_imm32) (__CONTEXT, 0x69, __reg32(a), __reg32(b), c);
 	}
 
 	__DEF_INSTR_3(imul_32, rmi, __REG, __MEM, __IMM32)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x6b, __reg32(a), __MEMOP(b), (int8)c);
+			return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0x6b, __reg32(a), __MEMOP(b), (int8_t)c);
 		return __MODRM(mem_onebyte_imm32) (__CONTEXT, 0x69, __reg32(a), __MEMOP(b), c);
 	}
 
@@ -2722,14 +2749,14 @@ namespace asmx86
 	__DEF_INSTR_3(imul_64, rri, __REG, __REG, __IMM32)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(reg_onebyte64_imm8) (__CONTEXT, 0x6b, __reg64(a), __reg64(b), (int8)c);
+			return __MODRM(reg_onebyte64_imm8) (__CONTEXT, 0x6b, __reg64(a), __reg64(b), (int8_t)c);
 		return __MODRM(reg_onebyte64_imm32) (__CONTEXT, 0x69, __reg64(a), __reg64(b), c);
 	}
 
 	__DEF_INSTR_3(imul_64, rmi, __REG, __MEM, __IMM32)
 	{
 		if ((c >= -0x80) && (c <= 0x7f))
-			return __MODRM(mem_onebyte64_imm8) (__CONTEXT, 0x6b, __reg64(a), __MEMOP(b), (int8)c);
+			return __MODRM(mem_onebyte64_imm8) (__CONTEXT, 0x6b, __reg64(a), __MEMOP(b), (int8_t)c);
 		return __MODRM(mem_onebyte64_imm32) (__CONTEXT, 0x69, __reg64(a), __MEMOP(b), c);
 	}
 #endif
@@ -3031,42 +3058,42 @@ namespace asmx86
 	__DEF_INSTR_2(mov_8, rm, __REG, __MEM)
 	{
 		if ((a == REG_AL) && (__MEM_BASE(b) == NONE) && (__MEM_INDEX(b) == NONE))
-			return __onebyte_imm32(__CONTEXT, 0xa0, (int32)__MEM_OFFSET(b));
+			return __onebyte_imm32(__CONTEXT, 0xa0, (int32_t)__MEM_OFFSET(b));
 		return __MODRM(mem_onebyte) (__CONTEXT, 0x8a, __reg8(a), __MEMOP(b), 0);
 	}
 
 	__DEF_INSTR_2(mov_8, mr, __MEM, __REG)
 	{
 		if ((b == REG_AL) && (__MEM_BASE(a) == NONE) && (__MEM_INDEX(a) == NONE))
-			return __onebyte_imm32(__CONTEXT, 0xa2, (int32)__MEM_OFFSET(a));
+			return __onebyte_imm32(__CONTEXT, 0xa2, (int32_t)__MEM_OFFSET(a));
 		return __MODRM(mem_onebyte) (__CONTEXT, 0x88, __reg8(b), __MEMOP(a), 0);
 	}
 
 	__DEF_INSTR_2(mov_16, rm, __REG, __MEM)
 	{
 		if ((a == REG_AX) && (__MEM_BASE(b) == NONE) && (__MEM_INDEX(b) == NONE))
-			return __onebyte_opsz_imm32(__CONTEXT, 0xa1, (int32)__MEM_OFFSET(b));
+			return __onebyte_opsz_imm32(__CONTEXT, 0xa1, (int32_t)__MEM_OFFSET(b));
 		return __MODRM(mem_onebyte_opsz) (__CONTEXT, 0x8b, __reg16(a), __MEMOP(b), 0);
 	}
 
 	__DEF_INSTR_2(mov_16, mr, __MEM, __REG)
 	{
 		if ((b == REG_AX) && (__MEM_BASE(a) == NONE) && (__MEM_INDEX(a) == NONE))
-			return __onebyte_opsz_imm32(__CONTEXT, 0xa3, (int32)__MEM_OFFSET(a));
+			return __onebyte_opsz_imm32(__CONTEXT, 0xa3, (int32_t)__MEM_OFFSET(a));
 		return __MODRM(mem_onebyte_opsz) (__CONTEXT, 0x89, __reg16(b), __MEMOP(a), 0);
 	}
 
 	__DEF_INSTR_2(mov_32, rm, __REG, __MEM)
 	{
 		if ((a == REG_EAX) && (__MEM_BASE(b) == NONE) && (__MEM_INDEX(b) == NONE))
-			return __onebyte_imm32(__CONTEXT, 0xa1, (int32)__MEM_OFFSET(b));
+			return __onebyte_imm32(__CONTEXT, 0xa1, (int32_t)__MEM_OFFSET(b));
 		return __MODRM(mem_onebyte) (__CONTEXT, 0x8b, __reg32(a), __MEMOP(b), 0);
 	}
 
 	__DEF_INSTR_2(mov_32, mr, __MEM, __REG)
 	{
 		if ((b == REG_EAX) && (__MEM_BASE(a) == NONE) && (__MEM_INDEX(a) == NONE))
-			return __onebyte_imm32(__CONTEXT, 0xa3, (int32)__MEM_OFFSET(a));
+			return __onebyte_imm32(__CONTEXT, 0xa3, (int32_t)__MEM_OFFSET(a));
 		return __MODRM(mem_onebyte) (__CONTEXT, 0x89, __reg32(b), __MEMOP(a), 0);
 	}
 #endif
@@ -3092,7 +3119,7 @@ namespace asmx86
 	__DEF_INSTR_2(mov_64, mr, __MEM, __REG) { return __MODRM(mem_onebyte64) (__CONTEXT, 0x89, __reg64(b), __MEMOP(a), 0); }
 	__DEF_INSTR_2(mov_64, rr, __REG, __REG) { return __MODRM(reg_onebyte64) (__CONTEXT, 0x8b, __reg64(a), __reg64(b)); }
 	__DEF_INSTR_2(mov_64, ri, __REG, __IMM64) { return __onebyte64_opreg_imm64(__CONTEXT, 0xb8, __reg64(a), b); }
-	__DEF_INSTR_2(mov_64, mi, __MEM, __IMM32) { return __MODRM(mem_onebyte_imm32) (__CONTEXT, 0xc7, 0, __MEMOP(a), b); }
+	__DEF_INSTR_2(mov_64, mi, __MEM, __IMM32) { return __MODRM(mem_onebyte64_imm32) (__CONTEXT, 0xc7, 0, __MEMOP(a), b); }
 #endif
 
 
@@ -3230,42 +3257,42 @@ namespace asmx86
 
 
 	// Shift/rotate instructions
-	__DEF_INSTR_2_ARG(shiftrot_8, ri, __REG, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_8, ri, __REG, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(reg_onebyte) (__CONTEXT, 0xd0, op, __reg8(a));
 		return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0xc0, op, __reg8(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_8, mi, __MEM, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_8, mi, __MEM, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(mem_onebyte) (__CONTEXT, 0xd0, op, __MEMOP(a), 0);
 		return __MODRM(mem_onebyte_imm8) (__CONTEXT, 0xc0, op, __MEMOP(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_16, ri, __REG, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_16, ri, __REG, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(reg_onebyte_opsz) (__CONTEXT, 0xd1, op, __reg16(a));
 		return __MODRM(reg_onebyte_opsz_imm8) (__CONTEXT, 0xc1, op, __reg16(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_16, mi, __MEM, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_16, mi, __MEM, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(mem_onebyte_opsz) (__CONTEXT, 0xd1, op, __MEMOP(a), 0);
 		return __MODRM(mem_onebyte_opsz_imm8) (__CONTEXT, 0xc1, op, __MEMOP(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_32, ri, __REG, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_32, ri, __REG, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(reg_onebyte) (__CONTEXT, 0xd1, op, __reg32(a));
 		return __MODRM(reg_onebyte_imm8) (__CONTEXT, 0xc1, op, __reg32(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_32, mi, __MEM, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_32, mi, __MEM, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(mem_onebyte) (__CONTEXT, 0xd1, op, __MEMOP(a), 0);
@@ -3273,12 +3300,12 @@ namespace asmx86
 	}
 
 #define __ASSERT_SHIFT_BY_CL (void)b; __CGX86_ASSERT(b == REG_CL, "Shift/rotate count must be immediate or CL");
-	__DEF_INSTR_2_ARG(shiftrot_8, rr, __REG, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte) (__CONTEXT, 0xd2, op, __reg8(a)); }
-	__DEF_INSTR_2_ARG(shiftrot_8, mr, __MEM, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte) (__CONTEXT, 0xd2, op, __MEMOP(a), 0); }
-	__DEF_INSTR_2_ARG(shiftrot_16, rr, __REG, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte_opsz) (__CONTEXT, 0xd3, op, __reg16(a)); }
-	__DEF_INSTR_2_ARG(shiftrot_16, mr, __MEM, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte_opsz) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
-	__DEF_INSTR_2_ARG(shiftrot_32, rr, __REG, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte) (__CONTEXT, 0xd3, op, __reg32(a)); }
-	__DEF_INSTR_2_ARG(shiftrot_32, mr, __MEM, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(shiftrot_8, rr, __REG, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte) (__CONTEXT, 0xd2, op, __reg8(a)); }
+	__DEF_INSTR_2_ARG(shiftrot_8, mr, __MEM, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte) (__CONTEXT, 0xd2, op, __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(shiftrot_16, rr, __REG, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte_opsz) (__CONTEXT, 0xd3, op, __reg16(a)); }
+	__DEF_INSTR_2_ARG(shiftrot_16, mr, __MEM, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte_opsz) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(shiftrot_32, rr, __REG, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte) (__CONTEXT, 0xd3, op, __reg32(a)); }
+	__DEF_INSTR_2_ARG(shiftrot_32, mr, __MEM, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
 
 #define __SHIFTROT_INSTR(n, op) \
 	__DEF_INSTR_2(n ## _8, rr, __REG, __REG) { return __NAME(shiftrot_8, rr) (__CONTEXT, op, a, b); } \
@@ -3303,22 +3330,22 @@ namespace asmx86
 	__SHIFTROT_INSTR(sar, 7)
 
 #ifdef __CODEGENX86_64BIT
-	__DEF_INSTR_2_ARG(shiftrot_64, ri, __REG, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_64, ri, __REG, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(reg_onebyte64) (__CONTEXT, 0xd1, op, __reg64(a));
 		return __MODRM(reg_onebyte64_imm8) (__CONTEXT, 0xc1, op, __reg64(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_64, mi, __MEM, __IMM8, uint8 op)
+	__DEF_INSTR_2_ARG(shiftrot_64, mi, __MEM, __IMM8, uint8_t op)
 	{
 		if (b == 1)
 			return __MODRM(mem_onebyte64) (__CONTEXT, 0xd1, op, __MEMOP(a), 0);
 		return __MODRM(mem_onebyte64_imm8) (__CONTEXT, 0xc1, op, __MEMOP(a), b);
 	}
 
-	__DEF_INSTR_2_ARG(shiftrot_64, rr, __REG, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte64) (__CONTEXT, 0xd3, op, __reg64(a)); }
-	__DEF_INSTR_2_ARG(shiftrot_64, mr, __MEM, __REG, uint8 op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte64) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
+	__DEF_INSTR_2_ARG(shiftrot_64, rr, __REG, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(reg_onebyte64) (__CONTEXT, 0xd3, op, __reg64(a)); }
+	__DEF_INSTR_2_ARG(shiftrot_64, mr, __MEM, __REG, uint8_t op) { __ASSERT_SHIFT_BY_CL; return __MODRM(mem_onebyte64) (__CONTEXT, 0xd3, op, __MEMOP(a), 0); }
 
 #define __SHIFTROT_INSTR_64(n, op) \
 	__DEF_INSTR_2(n ## _64, rr, __REG, __REG) { return __NAME(shiftrot_64, rr) (__CONTEXT, op, a, b); } \
@@ -3409,6 +3436,39 @@ namespace asmx86
 #endif
 
 
+	// String instructions
+	__ONEBYTE_INSTR(rep, 0xf3)
+	__ONEBYTE_INSTR(repe, 0xf3)
+	__ONEBYTE_INSTR(repz, 0xf3)
+	__ONEBYTE_INSTR(repne, 0xf2)
+	__ONEBYTE_INSTR(repnz, 0xf2)
+	__ONEBYTE_INSTR(movsb, 0xa4)
+	__ONEBYTE_OPSZ_INSTR(movsw, 0xa5)
+	__ONEBYTE_INSTR(movsd, 0xa5)
+	__ONEBYTE_INSTR(cmpsb, 0xa6)
+	__ONEBYTE_OPSZ_INSTR(cmpsw, 0xa7)
+	__ONEBYTE_INSTR(cmpsd, 0xa7)
+	__ONEBYTE_INSTR(stosb, 0xaa)
+	__ONEBYTE_OPSZ_INSTR(stosw, 0xab)
+	__ONEBYTE_INSTR(stosd, 0xab)
+	__ONEBYTE_INSTR(lodsb, 0xac)
+	__ONEBYTE_OPSZ_INSTR(lodsw, 0xad)
+	__ONEBYTE_INSTR(lodsd, 0xad)
+	__ONEBYTE_INSTR(scasb, 0xae)
+	__ONEBYTE_OPSZ_INSTR(scasw, 0xaf)
+	__ONEBYTE_INSTR(scasd, 0xaf)
+#ifdef __CODEGENX86_64BIT
+	__ONEBYTE_INSTR_64(movsq, 0xa5)
+	__ONEBYTE_INSTR_64(cmpsq, 0xa7)
+	__ONEBYTE_INSTR_64(stosq, 0xab)
+	__ONEBYTE_INSTR_64(lodsq, 0xad)
+	__ONEBYTE_INSTR_64(scasq, 0xaf)
+#endif
+
+	// Floating point instructions
+	__FPU_TWOBYTE_INSTR(fnop, 0xd9, 0xd0)
+	__DEF_INSTR_1(fstenv, m, __MEM) { return __MODRM(mem_onebyte) (__CONTEXT, 0xd9, 6, __MEMOP(a), 0); }
+
 	// Misc instructions
 #ifdef __CODEGENX86_32BIT
 	__ONEBYTE_INSTR(daa, 0x27)
@@ -3446,6 +3506,9 @@ namespace asmx86
 	__ONEBYTE_INSTR(std, 0xfd)
 	__TWOBYTE_INSTR(ud2, 0x0b);
 	__TWOBYTE_INSTR(cpuid, 0xa2);
+	__TWOBYTE_INSTR(syscall, 0x05);
+	__TWOBYTE_INSTR(sysenter, 0x34);
+	__TWOBYTE_INSTR(rdtsc, 0x31);
 
 
 #ifdef __cplusplus

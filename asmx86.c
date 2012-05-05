@@ -66,19 +66,19 @@ namespace x86
 		Instruction* result;
 		InstructionOperand* operand0;
 		InstructionOperand* operand1;
-		const uint8* opcodeStart;
-		const uint8* opcode;
-		uint64 addr;
+		const uint8_t* opcodeStart;
+		const uint8_t* opcode;
+		uint64_t addr;
 		size_t len, origLen;
-		uint16 opSize, finalOpSize, addrSize;
-		uint32 flags;
+		uint16_t opSize, finalOpSize, addrSize;
+		uint32_t flags;
 		bool invalid;
 		bool insufficientLength;
 		bool opPrefix;
 		RepPrefix rep;
 		bool using64, rex;
 		bool rexRM1, rexRM2, rexReg;
-		int64* ripRelFixup;
+		int64_t* ripRelFixup;
 	};
 #ifndef __cplusplus
 	typedef struct DecodeState DecodeState;
@@ -225,7 +225,7 @@ namespace x86
 	struct DecodeDef
 	{
 		DecodingFunction func;
-		uint16 flags;
+		uint16_t flags;
 	};
 #ifndef __cplusplus
 	typedef struct DecodeDef DecodeDef;
@@ -305,8 +305,8 @@ namespace x86
 
 	struct InstructionEncoding
 	{
-		uint16 operation : 9;
-		uint16 encoding : 7;
+		uint16_t operation : 9;
+		uint16_t encoding : 7;
 	};
 #ifndef __cplusplus
 	typedef struct InstructionEncoding InstructionEncoding;
@@ -314,7 +314,7 @@ namespace x86
 
 	struct SparseInstructionEncoding
 	{
-		uint8 opcode;
+		uint8_t opcode;
 		InstructionEncoding encoding;
 	};
 #ifndef __cplusplus
@@ -564,7 +564,7 @@ namespace x86
 	};
 
 
-	static const uint16 groupOperations[26][8] =
+	static const uint16_t groupOperations[26][8] =
 	{
 		{ADD, OR, ADC, SBB, AND, SUB, XOR, CMP}, // Group 0
 		{ROL, ROR, RCL, RCR, SHL, SHR, SHL, SAR}, // Group 1
@@ -595,7 +595,7 @@ namespace x86
 	};
 
 
-	static const uint16 group0F01RegOperations[8][8] =
+	static const uint16_t group0F01RegOperations[8][8] =
 	{
 		{INVALID, VMCALL, VMLAUNCH, VMRESUME, VMXOFF, INVALID, INVALID, INVALID},
 		{MONITOR, MWAIT, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID},
@@ -608,7 +608,7 @@ namespace x86
 	};
 
 
-	static const uint16 mmxGroupOperations[3][8][2] =
+	static const uint16_t mmxGroupOperations[3][8][2] =
 	{
 		{ // Group 0
 			{INVALID, INVALID}, {INVALID, INVALID}, {PSRLW, PSRLW}, {INVALID, INVALID},
@@ -639,9 +639,9 @@ namespace x86
 
 	struct SSETableOperationEntry
 	{
-		uint16 operation : 10;
-		uint16 regType : 3;
-		uint16 rmType : 3;
+		uint16_t operation : 10;
+		uint16_t regType : 3;
+		uint16_t rmType : 3;
 	};
 
 #ifndef __cplusplus
@@ -901,8 +901,8 @@ namespace x86
 
 	struct SparseOpEntry
 	{
-		uint8 opcode;
-		uint16 operation;
+		uint8_t opcode;
+		uint16_t operation;
 	};
 #ifndef __cplusplus
 	typedef struct SparseOpEntry SparseOpEntry;
@@ -919,7 +919,7 @@ namespace x86
 	};
 
 
-	typedef uint8 RegDef;
+	typedef uint8_t RegDef;
 	static const RegDef reg8List[8] = {REG_AL, REG_CL, REG_DL, REG_BL, REG_AH, REG_CH, REG_DH, REG_BH};
 	static const RegDef reg8List64[16] = {REG_AL, REG_CL, REG_DL, REG_BL, REG_SPL, REG_BPL, REG_SIL, REG_DIL,
 		REG_R8B, REG_R9B, REG_R10B, REG_R11B, REG_R12B, REG_R13B, REG_R14B, REG_R15B};
@@ -1006,7 +1006,7 @@ namespace x86
 	}
 
 	
-	static uint16 __fastcall GetFinalOpSize(DecodeState* restrict state)
+	static uint16_t __fastcall GetFinalOpSize(DecodeState* restrict state)
 	{
 		if (state->flags & DEC_FLAG_BYTE)
 			return 1;
@@ -1014,9 +1014,9 @@ namespace x86
 	}
 
 
-	static uint8 __fastcall Read8(DecodeState* restrict state)
+	static uint8_t __fastcall Read8(DecodeState* restrict state)
 	{
-		uint8 val;
+		uint8_t val;
 
 		if (state->len < 1)
 		{
@@ -1033,9 +1033,9 @@ namespace x86
 	}
 
 
-	static uint8 __fastcall Peek8(DecodeState* restrict state)
+	static uint8_t __fastcall Peek8(DecodeState* restrict state)
 	{
-		uint8 val;
+		uint8_t val;
 
 		if (state->len < 1)
 		{
@@ -1051,9 +1051,9 @@ namespace x86
 	}
 
 
-	static uint16 __fastcall Read16(DecodeState* restrict state)
+	static uint16_t __fastcall Read16(DecodeState* restrict state)
 	{
-		uint16 val;
+		uint16_t val;
 
 		if (state->len < 2)
 		{
@@ -1064,16 +1064,16 @@ namespace x86
 			return 0;
 		}
 
-		val = *((uint16*)state->opcode);
+		val = *((uint16_t*)state->opcode);
 		state->opcode += 2;
 		state->len -= 2;
 		return val;
 	}
 
 
-	static uint32 __fastcall Read32(DecodeState* restrict state)
+	static uint32_t __fastcall Read32(DecodeState* restrict state)
 	{
-		uint32 val;
+		uint32_t val;
 
 		if (state->len < 4)
 		{
@@ -1084,16 +1084,16 @@ namespace x86
 			return 0;
 		}
 
-		val = *((uint32*)state->opcode);
+		val = *((uint32_t*)state->opcode);
 		state->opcode += 4;
 		state->len -= 4;
 		return val;
 	}
 
 
-	static uint64 __fastcall Read64(DecodeState* restrict state)
+	static uint64_t __fastcall Read64(DecodeState* restrict state)
 	{
-		uint64 val;
+		uint64_t val;
 
 		if (state->len < 8)
 		{
@@ -1104,32 +1104,32 @@ namespace x86
 			return 0;
 		}
 
-		val = *((uint64*)state->opcode);
+		val = *((uint64_t*)state->opcode);
 		state->opcode += 8;
 		state->len -= 8;
 		return val;
 	}
 
 
-	static int64 __fastcall ReadSigned8(DecodeState* restrict state)
+	static int64_t __fastcall ReadSigned8(DecodeState* restrict state)
 	{
-		return (int64)(int8)Read8(state);
+		return (int64_t)(int8_t)Read8(state);
 	}
 
 
-	static int64 __fastcall ReadSigned16(DecodeState* restrict state)
+	static int64_t __fastcall ReadSigned16(DecodeState* restrict state)
 	{
-		return (int64)(int16)Read16(state);
+		return (int64_t)(int16_t)Read16(state);
 	}
 
 
-	static int64 __fastcall ReadSigned32(DecodeState* restrict state)
+	static int64_t __fastcall ReadSigned32(DecodeState* restrict state)
 	{
-		return (int64)(int32)Read32(state);
+		return (int64_t)(int32_t)Read32(state);
 	}
 
 
-	static int64 __fastcall ReadFinalOpSize(DecodeState* restrict state)
+	static int64_t __fastcall ReadFinalOpSize(DecodeState* restrict state)
 	{
 		if (state->flags & DEC_FLAG_IMM_SX)
 			return ReadSigned8(state);
@@ -1148,7 +1148,7 @@ namespace x86
 	}
 
 
-	static int64 __fastcall ReadAddrSize(DecodeState* restrict state)
+	static int64_t __fastcall ReadAddrSize(DecodeState* restrict state)
 	{
 		switch (state->addrSize)
 		{
@@ -1162,7 +1162,7 @@ namespace x86
 	}
 
 
-	static int64 __fastcall ReadSignedFinalOpSize(DecodeState* restrict state)
+	static int64_t __fastcall ReadSignedFinalOpSize(DecodeState* restrict state)
 	{
 		switch (state->finalOpSize)
 		{
@@ -1254,13 +1254,13 @@ namespace x86
 	}
 
 
-	static void __fastcall ProcessOpcode(DecodeState* restrict state, const InstructionEncoding* map, uint8 opcode)
+	static void __fastcall ProcessOpcode(DecodeState* restrict state, const InstructionEncoding* map, uint8_t opcode)
 	{
 		ProcessEncoding(state, &map[opcode]);
 	}
 
 
-	static void __fastcall ProcessSparseOpcode(DecodeState* restrict state, const SparseInstructionEncoding* map, size_t mapSize, uint8 opcode)
+	static void __fastcall ProcessSparseOpcode(DecodeState* restrict state, const SparseInstructionEncoding* map, size_t mapSize, uint8_t opcode)
 	{
 		int i, min, max;
 		state->result->operation = INVALID;
@@ -1286,7 +1286,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetMemOperand(DecodeState* restrict state, InstructionOperand* oper, const RMDef* def, int64 immed)
+	static void __fastcall SetMemOperand(DecodeState* restrict state, InstructionOperand* oper, const RMDef* def, int64_t immed)
 	{
 		oper->operand = MEM;
 		oper->components[0] = def->first;
@@ -1296,11 +1296,11 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRM(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* regList, uint16 rmSize, uint8* regOper)
+	static void __fastcall DecodeRM(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* regList, uint16_t rmSize, uint8_t* regOper)
 	{
-		uint8 rmByte = Read8(state);
-		uint8 mod = rmByte >> 6;
-		uint8 rm = rmByte & 7;
+		uint8_t rmByte = Read8(state);
+		uint8_t mod = rmByte >> 6;
+		uint8_t rm = rmByte & 7;
 		InstructionOperand temp;
 
 		if (regOper)
@@ -1343,16 +1343,16 @@ namespace x86
 		else
 		{
 			const RegDef* addrRegList = GetRegListForAddrSize(state);
-			uint8 rmReg1Offset = state->rexRM1 ? 8 : 0;
-			uint8 rmReg2Offset = state->rexRM2 ? 8 : 0;
+			uint8_t rmReg1Offset = state->rexRM1 ? 8 : 0;
+			uint8_t rmReg2Offset = state->rexRM2 ? 8 : 0;
 			SegmentRegister seg = SEG_DEFAULT;
 			rmOper->operand = MEM;
 			if ((mod != 3) && (rm == 4))
 			{
 				// SIB byte present
-				uint8 sibByte = Read8(state);
-				uint8 base = sibByte & 7;
-				uint8 index = (sibByte >> 3) & 7;
+				uint8_t sibByte = Read8(state);
+				uint8_t base = sibByte & 7;
+				uint8_t index = (sibByte >> 3) & 7;
 				rmOper->scale = 1 << (sibByte >> 6);
 				if ((mod != 0) || (base != 5))
 					rmOper->components[0] = (OperandType)addrRegList[base + rmReg1Offset];
@@ -1412,21 +1412,21 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRMReg(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* rmRegList, uint16 rmSize,
-		InstructionOperand* regOper, const RegDef* regList, uint16 regSize)
+	static void __fastcall DecodeRMReg(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* rmRegList, uint16_t rmSize,
+		InstructionOperand* regOper, const RegDef* regList, uint16_t regSize)
 	{
-		uint8 reg;
+		uint8_t reg;
 		DecodeRM(state, rmOper, rmRegList, rmSize, &reg);
 		if (regOper)
 		{
-			uint8 regOffset = state->rexReg ? 8 : 0;
+			uint8_t regOffset = state->rexReg ? 8 : 0;
 			regOper->size = regSize;
 			regOper->operand = (OperandType)regList[reg + regOffset];
 		}
 	}
 
 
-	static void __fastcall SetOperandToEsEdi(DecodeState* restrict state, InstructionOperand* oper, uint16 size)
+	static void __fastcall SetOperandToEsEdi(DecodeState* restrict state, InstructionOperand* oper, uint16_t size)
 	{
 		const RegDef* addrRegList = GetRegListForAddrSize(state);
 		oper->operand = MEM;
@@ -1436,7 +1436,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToDsEsi(DecodeState* restrict state, InstructionOperand* oper, uint16 size)
+	static void __fastcall SetOperandToDsEsi(DecodeState* restrict state, InstructionOperand* oper, uint16_t size)
 	{
 		const RegDef* addrRegList = GetRegListForAddrSize(state);
 		oper->operand = MEM;
@@ -1466,7 +1466,7 @@ namespace x86
 	static void __fastcall SetOperandToOpReg(DecodeState* restrict state, InstructionOperand* oper)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
-		uint8 regOffset = state->rexRM1 ? 8 : 0;
+		uint8_t regOffset = state->rexRM1 ? 8 : 0;
 		oper->operand = (OperandType)regList[(state->opcode[-1] & 7) + regOffset];
 		oper->size = state->finalOpSize;
 	}
@@ -1496,7 +1496,7 @@ namespace x86
 	}
 
 
-	static uint8 __fastcall DecodeSSEPrefix(DecodeState* restrict state)
+	static uint8_t __fastcall DecodeSSEPrefix(DecodeState* restrict state)
 	{
 		if (state->opPrefix)
 		{
@@ -1517,7 +1517,7 @@ namespace x86
 	}
 
 
-	uint16 __fastcall GetSizeForSSEType(uint8 type)
+	uint16_t __fastcall GetSizeForSSEType(uint8_t type)
 	{
 		if (type == 2)
 			return 8;
@@ -1527,7 +1527,7 @@ namespace x86
 	}
 
 
-	InstructionOperand* __fastcall GetOperandForSSEEntryType(DecodeState* restrict state, uint16 type, uint8 operandIndex)
+	InstructionOperand* __fastcall GetOperandForSSEEntryType(DecodeState* restrict state, uint16_t type, uint8_t operandIndex)
 	{
 		if (type == SSE_128_FLIP)
 			operandIndex = 1 - operandIndex;
@@ -1537,7 +1537,7 @@ namespace x86
 	}
 
 
-	const RegDef* __fastcall GetRegListForSSEEntryType(DecodeState* restrict state, uint16 type)
+	const RegDef* __fastcall GetRegListForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1552,7 +1552,7 @@ namespace x86
 	}
 
 
-	uint16 __fastcall GetSizeForSSEEntryType(DecodeState* restrict state, uint16 type)
+	uint16_t __fastcall GetSizeForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1572,7 +1572,7 @@ namespace x86
 	}
 
 
-	void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16 type)
+	void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		if ((type == GPR_32_OR_64) && (state->opSize == 8))
 			state->result->operation = (InstructionOperation)((int)state->result->operation + 1);
@@ -1587,7 +1587,7 @@ namespace x86
 
 	static void __fastcall DecodeTwoByte(DecodeState* restrict state)
 	{
-		uint8 opcode = Read8(state);
+		uint8_t opcode = Read8(state);
 		if (opcode == 0x38)
 			ProcessSparseOpcode(state, threeByte0F38Map, sizeof(threeByte0F38Map) / sizeof(SparseInstructionEncoding), Read8(state));
 		else if (opcode == 0x3a)
@@ -1602,9 +1602,9 @@ namespace x86
 
 	static void __fastcall DecodeFpu(DecodeState* restrict state)
 	{
-		uint8 modRM = Peek8(state);
-		uint8 reg = (modRM >> 3) & 7;
-		uint8 op = (uint8)state->result->operation;
+		uint8_t modRM = Peek8(state);
+		uint8_t reg = (modRM >> 3) & 7;
+		uint8_t op = (uint8_t)state->result->operation;
 
 		const InstructionEncoding* map;
 		if ((modRM & 0xc0) == 0xc0)
@@ -1622,7 +1622,7 @@ namespace x86
 
 	static void __fastcall DecodeRegRM(DecodeState* restrict state)
 	{
-		uint16 size = state->finalOpSize;
+		uint16_t size = state->finalOpSize;
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		switch (state->flags & DEC_FLAG_REG_RM_SIZE_MASK)
 		{
@@ -1680,7 +1680,7 @@ namespace x86
 
 	static void __fastcall DecodePushPopSeg(DecodeState* restrict state)
 	{
-		int8 offset = 0;
+		int8_t offset = 0;
 		if (state->opcode[-1] >= 0xa0) // FS/GS
 			offset = -16;
 		state->operand0->operand = (OperandType)(REG_ES + (state->opcode[-1] >> 3) + offset);
@@ -1768,7 +1768,7 @@ namespace x86
 	static void __fastcall DecodeGroupRM(DecodeState* restrict state)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
-		uint8 regField;
+		uint8_t regField;
 		DecodeRM(state, state->operand0, regList, state->finalOpSize, &regField);
 		state->result->operation = (InstructionOperation)groupOperations[(int)state->result->operation][regField];
 	}
@@ -1821,8 +1821,8 @@ namespace x86
 		if (state->using64)
 		{
 			// Default to 64-bit for jumps and calls
-			uint8 rm = Peek8(state);
-			uint8 regField = (rm >> 3) & 7;
+			uint8_t rm = Peek8(state);
+			uint8_t regField = (rm >> 3) & 7;
 			if ((regField >= 2) && (regField <= 5))
 				state->finalOpSize = state->opSize = state->opPrefix ? 4 : 8;
 		}
@@ -1842,8 +1842,8 @@ namespace x86
 
 	static void __fastcall DecodeGroup0F00(DecodeState* restrict state)
 	{
-		uint8 rm = Peek8(state);
-		uint8 regField = (rm >> 3) & 7;
+		uint8_t rm = Peek8(state);
+		uint8_t regField = (rm >> 3) & 7;
 		if (regField >= 2)
 			state->opSize = 2;
 		DecodeGroupRM(state);
@@ -1852,10 +1852,10 @@ namespace x86
 
 	static void __fastcall DecodeGroup0F01(DecodeState* restrict state)
 	{
-		uint8 rm = Peek8(state);
-		uint8 modField = (rm >> 6) & 3;
-		uint8 regField = (rm >> 3) & 7;
-		uint8 rmField = rm & 7;
+		uint8_t rm = Peek8(state);
+		uint8_t modField = (rm >> 6) & 3;
+		uint8_t regField = (rm >> 3) & 7;
+		uint8_t rmField = rm & 7;
 
 		if ((modField == 3) && (regField != 4) && (regField != 6))
 		{
@@ -1875,9 +1875,9 @@ namespace x86
 
 	static void __fastcall DecodeGroup0FAE(DecodeState* restrict state)
 	{
-		uint8 rm = Peek8(state);
-		uint8 modField = (rm >> 6) & 3;
-		uint8 regField = (rm >> 3) & 7;
+		uint8_t rm = Peek8(state);
+		uint8_t modField = (rm >> 6) & 3;
+		uint8_t regField = (rm >> 3) & 7;
 
 		if (modField == 3)
 		{
@@ -1913,7 +1913,7 @@ namespace x86
 	static void __fastcall DecodeRMSRegV(DecodeState* restrict state)
 	{
 		const RegDef* regList = GetRegListForOpSize(state);
-		uint8 regField;
+		uint8_t regField;
 		DecodeRM(state, state->operand0, regList, state->opSize, &regField);
 		if (regField >= 6)
 			state->invalid = true;
@@ -2003,7 +2003,7 @@ namespace x86
 
 	static void __fastcall Decode3DNow(DecodeState* restrict state)
 	{
-		uint8 op;
+		uint8_t op;
 		int i, min, max;
 		DecodeRMReg(state, state->operand1, mmxRegList, 8, state->operand0, mmxRegList, 8);
 		op = Read8(state);
@@ -2026,9 +2026,9 @@ namespace x86
 
 	static void __fastcall DecodeSSETable(DecodeState* restrict state)
 	{
-		uint8 type = DecodeSSEPrefix(state);
-		uint8 rm = Peek8(state);
-		uint8 modField = (rm >> 6) & 3;
+		uint8_t type = DecodeSSEPrefix(state);
+		uint8_t rm = Peek8(state);
+		uint8_t modField = (rm >> 6) & 3;
 
 		const SSETableEntry* entry = &sseTable[(int)state->result->operation];
 		const SSETableOperationEntry* opEntry;
@@ -2070,10 +2070,10 @@ namespace x86
 
 	static void __fastcall DecodeSSE(DecodeState* restrict state)
 	{
-		uint8 type = DecodeSSEPrefix(state);
-		uint8 rm = Peek8(state);
-		uint8 modField = (rm >> 6) & 3;
-		uint16 size;
+		uint8_t type = DecodeSSEPrefix(state);
+		uint8_t rm = Peek8(state);
+		uint8_t modField = (rm >> 6) & 3;
+		uint16_t size;
 
 		state->result->operation = (InstructionOperation)((int)state->result->operation + type);
 		if (modField == 3)
@@ -2086,10 +2086,10 @@ namespace x86
 
 	static void __fastcall DecodeSSESingle(DecodeState* restrict state)
 	{
-		uint8 type = DecodeSSEPrefix(state);
-		uint8 rm = Peek8(state);
-		uint8 modField = (rm >> 6) & 3;
-		uint16 size;
+		uint8_t type = DecodeSSEPrefix(state);
+		uint8_t rm = Peek8(state);
+		uint8_t modField = (rm >> 6) & 3;
+		uint16_t size;
 
 		if ((type == 1) || (type == 2))
 		{
@@ -2108,7 +2108,7 @@ namespace x86
 
 	static void __fastcall DecodeSSEPacked(DecodeState* restrict state)
 	{
-		uint8 type = DecodeSSEPrefix(state);
+		uint8_t type = DecodeSSEPrefix(state);
 
 		if ((type == 2) || (type == 3))
 		{
@@ -2141,7 +2141,7 @@ namespace x86
 
 	static void __fastcall DecodeMMXGroup(DecodeState* restrict state)
 	{
-		uint8 regField;
+		uint8_t regField;
 		if (state->opPrefix)
 		{
 			DecodeRM(state, state->operand0, xmmRegList, 16, &regField);
@@ -2167,7 +2167,7 @@ namespace x86
 	static void __fastcall DecodeRegCR(DecodeState* restrict state)
 	{
 		const RegDef* regList;
-		uint8 reg;
+		uint8_t reg;
 		if (state->opSize == 2)
 			state->opSize = 4;
 		regList = GetRegListForOpSize(state);
@@ -2262,7 +2262,7 @@ namespace x86
 
 	static void __fastcall DecodeRegGroupNoOperands(DecodeState* restrict state)
 	{
-		uint8 rmByte = Read8(state);
+		uint8_t rmByte = Read8(state);
 		state->result->operation = (InstructionOperation)groupOperations[(int)state->result->operation][rmByte & 7];
 	}
 
@@ -2277,8 +2277,8 @@ namespace x86
 
 	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state)
 	{
-		uint8 rm = Peek8(state);
-		uint8 regField = (rm >> 3) & 7;
+		uint8_t rm = Peek8(state);
+		uint8_t regField = (rm >> 3) & 7;
 
 		if (regField == 1)
 		{
@@ -2325,19 +2325,19 @@ namespace x86
 	{
 		const RegDef* srcRegList = GetRegListForFinalOpSize(state);
 		const RegDef* destRegList = (state->opSize == 8) ? reg64List : reg32List;
-		uint16 destSize = (state->opSize == 8) ? 8 : 4;
+		uint16_t destSize = (state->opSize == 8) ? 8 : 4;
 		DecodeRMReg(state, state->operand1, srcRegList, state->finalOpSize, state->operand0, destRegList, destSize);
 	}
 
 
 	static void __fastcall ProcessPrefixes(DecodeState* restrict state)
 	{
-		uint8 rex = 0;
+		uint8_t rex = 0;
 		bool addrPrefix = false;
 
 		while (!state->invalid)
 		{
-			uint8 prefix = Read8(state);
+			uint8_t prefix = Read8(state);
 			if ((prefix >= 0x26) && (prefix <= 0x3e) && ((prefix & 7) == 6))
 			{
 				// Segment prefix
@@ -2441,7 +2441,7 @@ namespace x86
 	}
 
 
-	bool Disassemble16(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result)
+	bool Disassemble16(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result)
 	{
 		DecodeState state;
 		state.result = result;
@@ -2461,7 +2461,7 @@ namespace x86
 	}
 
 
-	bool Disassemble32(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result)
+	bool Disassemble32(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result)
 	{
 		DecodeState state;
 		state.result = result;
@@ -2481,7 +2481,7 @@ namespace x86
 	}
 
 
-	bool Disassemble64(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result)
+	bool Disassemble64(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result)
 	{
 		DecodeState state;
 		state.result = result;
@@ -2518,10 +2518,10 @@ namespace x86
 	}
 
 
-	static void __fastcall WriteHex(char** out, size_t* outMaxLen, uint64 val, uint32 width, bool prefix)
+	static void __fastcall WriteHex(char** out, size_t* outMaxLen, uint64_t val, uint32_t width, bool prefix)
 	{
 		char temp[17];
-		int32 i;
+		int32_t i;
 		if (prefix)
 			WriteString(out, outMaxLen, "0x");
 		if (width > 16)
@@ -2539,7 +2539,7 @@ namespace x86
 	}
 
 
-	static const char* __fastcall GetSizeString(uint16 size)
+	static const char* __fastcall GetSizeString(uint16_t size)
 	{
 		switch (size)
 		{
@@ -2563,7 +2563,7 @@ namespace x86
 	}
 
 
-	static void __fastcall WriteOperand(char** out, size_t* outMaxLen, OperandType type, uint8 scale, bool plus)
+	static void __fastcall WriteOperand(char** out, size_t* outMaxLen, OperandType type, uint8_t scale, bool plus)
 	{
 		if (plus)
 			WriteString(out, outMaxLen, "+");
@@ -2576,8 +2576,8 @@ namespace x86
 	}
 
 
-	size_t FormatInstructionString(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-		uint64 addr, const Instruction* instr)
+	size_t FormatInstructionString(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+		uint64_t addr, const Instruction* instr)
 	{
 		char* start = out;
 		size_t len;
@@ -2585,7 +2585,7 @@ namespace x86
 		{
 			if (*fmt == '%')
 			{
-				uint32 width = 0;
+				uint32_t width = 0;
 				for (fmt++; *fmt; fmt++)
 				{
 					if (*fmt == 'a')
@@ -2623,7 +2623,7 @@ namespace x86
 					}
 					else if (*fmt == 'o')
 					{
-						uint32 i;
+						uint32_t i;
 						for (i = 0; i < 3; i++)
 						{
 							if (instr->operands[i].operand == NONE)
@@ -2655,14 +2655,14 @@ namespace x86
 								if ((instr->operands[i].immediate != 0) || ((instr->operands[i].components[0] == NONE) &&
 									(instr->operands[i].components[1] == NONE)))
 								{
-									if (plus && ((int64)instr->operands[i].immediate >= -0x80) &&
-										((int64)instr->operands[i].immediate < 0))
+									if (plus && ((int64_t)instr->operands[i].immediate >= -0x80) &&
+										((int64_t)instr->operands[i].immediate < 0))
 									{
 										WriteChar(&out, &outMaxLen, '-');
-										WriteHex(&out, &outMaxLen, -(int64)instr->operands[i].immediate, 2, true);
+										WriteHex(&out, &outMaxLen, -(int64_t)instr->operands[i].immediate, 2, true);
 									}
-									else if (plus && ((int64)instr->operands[i].immediate > 0) &&
-										((int64)instr->operands[i].immediate <= 0x7f))
+									else if (plus && ((int64_t)instr->operands[i].immediate > 0) &&
+										((int64_t)instr->operands[i].immediate <= 0x7f))
 									{
 										WriteChar(&out, &outMaxLen, '+');
 										WriteHex(&out, &outMaxLen, instr->operands[i].immediate, 2, true);
@@ -2700,8 +2700,8 @@ namespace x86
 	}
 
 
-	size_t DisassembleToString16(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-		uint64 addr, size_t maxLen, Instruction* instr)
+	size_t DisassembleToString16(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+		uint64_t addr, size_t maxLen, Instruction* instr)
 	{
 		if (!Disassemble16(opcode, addr, maxLen, instr))
 			return 0;
@@ -2709,8 +2709,8 @@ namespace x86
 	}
 
 
-	size_t DisassembleToString32(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-		uint64 addr, size_t maxLen, Instruction* instr)
+	size_t DisassembleToString32(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+		uint64_t addr, size_t maxLen, Instruction* instr)
 	{
 		if (!Disassemble32(opcode, addr, maxLen, instr))
 			return 0;
@@ -2718,8 +2718,8 @@ namespace x86
 	}
 
 
-	size_t DisassembleToString64(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-		uint64 addr, size_t maxLen, Instruction* instr)
+	size_t DisassembleToString64(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+		uint64_t addr, size_t maxLen, Instruction* instr)
 	{
 		if (!Disassemble64(opcode, addr, maxLen, instr))
 			return 0;

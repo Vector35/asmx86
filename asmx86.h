@@ -41,18 +41,10 @@
 #include <unistd.h>
 #endif
 
+#include <stdint.h>
+
 #undef IN
 #undef OUT
-
-
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
-typedef unsigned long long uint64;
-typedef char int8;
-typedef short int16;
-typedef int int32;
-typedef long long int64;
 
 
 #define X86_FLAG_LOCK		1
@@ -205,7 +197,8 @@ namespace asmx86
 		__X86_OPER(REG_DR8), __X86_OPER(REG_DR9), __X86_OPER(REG_DR10), __X86_OPER(REG_DR11), __X86_OPER(REG_DR12), __X86_OPER(REG_DR13), __X86_OPER(REG_DR14), __X86_OPER(REG_DR15),
 		__X86_OPER(REG_TR0), __X86_OPER(REG_TR1), __X86_OPER(REG_TR2), __X86_OPER(REG_TR3), __X86_OPER(REG_TR4), __X86_OPER(REG_TR5), __X86_OPER(REG_TR6), __X86_OPER(REG_TR7),
 		__X86_OPER(REG_TR8), __X86_OPER(REG_TR9), __X86_OPER(REG_TR10), __X86_OPER(REG_TR11), __X86_OPER(REG_TR12), __X86_OPER(REG_TR13), __X86_OPER(REG_TR14), __X86_OPER(REG_TR15),
-		__X86_OPER(REG_ES), __X86_OPER(REG_CS), __X86_OPER(REG_SS), __X86_OPER(REG_DS), __X86_OPER(REG_FS), __X86_OPER(REG_GS)
+		__X86_OPER(REG_ES), __X86_OPER(REG_CS), __X86_OPER(REG_SS), __X86_OPER(REG_DS), __X86_OPER(REG_FS), __X86_OPER(REG_GS),
+		__X86_OPER(REG_RIP)
 	};
 #ifndef __cplusplus
 	typedef enum OperandType OperandType;
@@ -216,9 +209,9 @@ namespace asmx86
 	{
 		OperandType operand;
 		OperandType components[2];
-		uint8 scale;
-		uint16 size;
-		int64 immediate;
+		uint8_t scale;
+		uint16_t size;
+		int64_t immediate;
 		SegmentRegister segment;
 	};
 #ifndef __cplusplus
@@ -230,7 +223,7 @@ namespace asmx86
 	{
 		InstructionOperation operation;
 		InstructionOperand operands[3];
-		uint32 flags;
+		uint32_t flags;
 		SegmentRegister segment;
 		size_t length;
 	};
@@ -243,19 +236,19 @@ namespace asmx86
 	extern "C"
 	{
 #endif
-		bool Disassemble16(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result);
-		bool Disassemble32(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result);
-		bool Disassemble64(const uint8* opcode, uint64 addr, size_t maxLen, Instruction* result);
+		bool Disassemble16(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result);
+		bool Disassemble32(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result);
+		bool Disassemble64(const uint8_t* opcode, uint64_t addr, size_t maxLen, Instruction* result);
 
-		size_t FormatInstructionString(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-			uint64 addr, const Instruction* instr);
+		size_t FormatInstructionString(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+			uint64_t addr, const Instruction* instr);
 
-		size_t DisassembleToString16(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-			uint64 addr, size_t maxLen, Instruction* instr);
-		size_t DisassembleToString32(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-			uint64 addr, size_t maxLen, Instruction* instr);
-		size_t DisassembleToString64(char* out, size_t outMaxLen, const char* fmt, const uint8* opcode,
-			uint64 addr, size_t maxLen, Instruction* instr);
+		size_t DisassembleToString16(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+			uint64_t addr, size_t maxLen, Instruction* instr);
+		size_t DisassembleToString32(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+			uint64_t addr, size_t maxLen, Instruction* instr);
+		size_t DisassembleToString64(char* out, size_t outMaxLen, const char* fmt, const uint8_t* opcode,
+			uint64_t addr, size_t maxLen, Instruction* instr);
 #ifdef __cplusplus
 	}
 }
