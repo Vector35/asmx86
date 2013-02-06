@@ -1942,6 +1942,41 @@ namespace asmx86
 		}
 	}
 
+	static __inline size_t __alwaysinline __MODRM(reg_threebyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t op2, uint8_t a, uint8_t b)
+	{
+		__TRANSLATE_UNUSED
+		__ASSERT_NO_INVALID_8BIT_COMBO
+		if (__MODRM(reg_need_rex) (a, b))
+		{
+			__WRITE_BUF_8_8_8_8(0, __MODRM(reg_get_rex) (a, b), 0x0f, op, op2);
+			__WRITE_BUF_8(4, 0xc0 | ((a & 7) << 3) | (b & 7));
+			return 5;
+		}
+		else
+		{
+			__WRITE_BUF_8_8_8_8(0, 0x0f, op, op2, 0xc0 | (a << 3) | b);
+			return 4;
+		}
+	}
+
+	static __inline size_t __alwaysinline __MODRM(reg_threebyte_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t op2, uint8_t a, uint8_t b)
+	{
+		__TRANSLATE_UNUSED
+		__ASSERT_NO_INVALID_8BIT_COMBO
+		if (__MODRM(reg_need_rex) (a, b))
+		{
+			__WRITE_BUF_8_8(0, prefix, __MODRM(reg_get_rex) (a, b));
+			__WRITE_BUF_8_8_8_8(2, 0x0f, op, op2, 0xc0 | ((a & 7) << 3) | (b & 7));
+			return 6;
+		}
+		else
+		{
+			__WRITE_BUF_8(0, prefix);
+			__WRITE_BUF_8_8_8_8(1, 0x0f, op, op2, 0xc0 | (a << 3) | b);
+			return 5;
+		}
+	}
+
 	static __inline size_t __alwaysinline __MODRM(mem_twobyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
 	{
 		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
@@ -1963,13 +1998,46 @@ namespace asmx86
 		{
 			__WRITE_BUF_8_8(0, prefix, __MODRM(mem_get_rex) (reg, __MEMOP(m)));
 			__WRITE_BUF_8_8(2, 0x0f, op);
-			return __MODRM(emit) (__CONTEXT_OFFSET(4), reg, __MEMOP(m), immsz) + 3;
+			return __MODRM(emit) (__CONTEXT_OFFSET(4), reg, __MEMOP(m), immsz) + 4;
 		}
 		else
 		{
 			__WRITE_BUF_8(0, prefix);
 			__WRITE_BUF_8_8(1, 0x0f, op);
-			return __MODRM(emit) (__CONTEXT_OFFSET(3), reg, __MEMOP(m), immsz) + 2;
+			return __MODRM(emit) (__CONTEXT_OFFSET(3), reg, __MEMOP(m), immsz) + 3;
+		}
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_threebyte) (__CONTEXT_PARAMS, uint8_t op, uint8_t op2, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
+	{
+		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
+		{
+			__WRITE_BUF_8_8(0, __MODRM(mem_get_rex) (reg, __MEMOP(m)), 0x0f);
+			__WRITE_BUF_8_8(2, op, op2);
+			return __MODRM(emit) (__CONTEXT_OFFSET(4), reg, __MEMOP(m), immsz) + 4;
+		}
+		else
+		{
+			__WRITE_BUF_8(0, 0x0f);
+			__WRITE_BUF_8_8(1, op, op2);
+			return __MODRM(emit) (__CONTEXT_OFFSET(3), reg, __MEMOP(m), immsz) + 3;
+		}
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_threebyte_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t op2, uint8_t reg, __MEM_PARAM(m), uint8_t immsz)
+	{
+		if (__MODRM(mem_need_rex) (reg, __MEMOP(m)))
+		{
+			__WRITE_BUF_8_8(0, prefix, __MODRM(mem_get_rex) (reg, __MEMOP(m)));
+			__WRITE_BUF_8_8(2, 0x0f, op);
+			__WRITE_BUF_8(4, op2);
+			return __MODRM(emit) (__CONTEXT_OFFSET(5), reg, __MEMOP(m), immsz) + 5;
+		}
+		else
+		{
+			__WRITE_BUF_8_8(0, prefix, 0x0f);
+			__WRITE_BUF_8_8(2, op, op2);
+			return __MODRM(emit) (__CONTEXT_OFFSET(4), reg, __MEMOP(m), immsz) + 4;
 		}
 	}
 
@@ -1980,9 +2048,51 @@ namespace asmx86
 		return ofs + 1;
 	}
 
+	static __inline size_t __alwaysinline __MODRM(reg_twobyte_imm8_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t grp, uint8_t a, int8_t imm)
+	{
+		size_t ofs = __MODRM(reg_twobyte_prefix) (__CONTEXT, prefix, op, grp, a);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
+	static __inline size_t __alwaysinline __MODRM(reg_threebyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t op2, uint8_t grp, uint8_t a, int8_t imm)
+	{
+		size_t ofs = __MODRM(reg_threebyte) (__CONTEXT, op, op2, grp, a);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
+	static __inline size_t __alwaysinline __MODRM(reg_threebyte_imm8_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t op2, uint8_t grp, uint8_t a, int8_t imm)
+	{
+		size_t ofs = __MODRM(reg_threebyte_prefix) (__CONTEXT, prefix, op, op2, grp, a);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
 	static __inline size_t __alwaysinline __MODRM(mem_twobyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
 	{
 		size_t ofs = __MODRM(mem_twobyte) (__CONTEXT, op, grp, __MEMOP(m), 1);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_twobyte_imm8_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t grp, __MEM_PARAM(m), int8_t imm)
+	{
+		size_t ofs = __MODRM(mem_twobyte_prefix) (__CONTEXT, prefix, op, grp, __MEMOP(m), 1);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_threebyte_imm8) (__CONTEXT_PARAMS, uint8_t op, uint8_t op2, uint8_t grp, __MEM_PARAM(m), int8_t imm)
+	{
+		size_t ofs = __MODRM(mem_threebyte) (__CONTEXT, op, op2, grp, __MEMOP(m), 1);
+		__WRITE_BUF_8(ofs, imm);
+		return ofs + 1;
+	}
+
+	static __inline size_t __alwaysinline __MODRM(mem_threebyte_imm8_prefix) (__CONTEXT_PARAMS, uint8_t prefix, uint8_t op, uint8_t op2, uint8_t grp, __MEM_PARAM(m), int8_t imm)
+	{
+		size_t ofs = __MODRM(mem_threebyte_prefix) (__CONTEXT, prefix, op, op2, grp, __MEMOP(m), 1);
 		__WRITE_BUF_8(ofs, imm);
 		return ofs + 1;
 	}
@@ -3523,9 +3633,37 @@ namespace asmx86
 
 
 	// SSE instructions
+	__DEF_INSTR_2(movss, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf3, 0x10, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(movss, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf3, 0x10, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(movss, mr, __MEM, __REG) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf3, 0x11, __xmmreg(b), __MEMOP(a), 0); }
 	__DEF_INSTR_2(movsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x10, __xmmreg(a), __xmmreg(b)); }
 	__DEF_INSTR_2(movsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x10, __xmmreg(a), __MEMOP(b), 0); }
 	__DEF_INSTR_2(movsd, mr, __MEM, __REG) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x11, __xmmreg(b), __MEMOP(a), 0); }
+
+	__DEF_INSTR_2(cvtss2sd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf3, 0x5a, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(cvtss2sd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf3, 0x5a, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(cvtsd2ss, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x5a, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(cvtsd2ss, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x5a, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(cvtsi2sd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x2a, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(cvtsi2sd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x2a, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(cvtsi2ss, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf3, 0x2a, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(cvtsi2ss, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf3, 0x2a, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(cvtsd2si, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x2d, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(cvtsd2si, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x2d, __xmmreg(a), __MEMOP(b), 0); }
+
+	__DEF_INSTR_2(addsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x58, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(addsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x58, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(subsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x5c, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(subsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x5c, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(mulsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x59, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(mulsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x59, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(divsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x5e, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(divsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x5e, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(sqrtsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x51, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(sqrtsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x51, __xmmreg(a), __MEMOP(b), 0); }
+
+	__DEF_INSTR_3(roundsd, rri, __REG, __REG, __IMM8) { return __MODRM(reg_threebyte_imm8_prefix) (__CONTEXT, 0x66, 0x3a, 0x0b, __xmmreg(a), __xmmreg(b), c); }
+	__DEF_INSTR_3(roundsd, rmi, __REG, __MEM, __IMM8) { return __MODRM(mem_threebyte_imm8_prefix) (__CONTEXT, 0x66, 0x3a, 0x0b, __xmmreg(a), __MEMOP(b), c); }
 
 
 	// Misc instructions
