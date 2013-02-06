@@ -3651,6 +3651,15 @@ namespace asmx86
 	__DEF_INSTR_2(cvtsd2si, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x2d, __xmmreg(a), __xmmreg(b)); }
 	__DEF_INSTR_2(cvtsd2si, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x2d, __xmmreg(a), __MEMOP(b), 0); }
 
+	__DEF_INSTR_2(comiss, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0x2f, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(comiss, rm, __REG, __MEM) { return __MODRM(mem_twobyte) (__CONTEXT, 0x2f, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(comisd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0x66, 0x2f, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(comisd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0x66, 0x2f, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(ucomiss, rr, __REG, __REG) { return __MODRM(reg_twobyte) (__CONTEXT, 0x2e, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(ucomiss, rm, __REG, __MEM) { return __MODRM(mem_twobyte) (__CONTEXT, 0x2e, __xmmreg(a), __MEMOP(b), 0); }
+	__DEF_INSTR_2(ucomisd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0x66, 0x2e, __xmmreg(a), __xmmreg(b)); }
+	__DEF_INSTR_2(ucomisd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0x66, 0x2e, __xmmreg(a), __MEMOP(b), 0); }
+
 	__DEF_INSTR_2(addsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x58, __xmmreg(a), __xmmreg(b)); }
 	__DEF_INSTR_2(addsd, rm, __REG, __MEM) { return __MODRM(mem_twobyte_prefix) (__CONTEXT, 0xf2, 0x58, __xmmreg(a), __MEMOP(b), 0); }
 	__DEF_INSTR_2(subsd, rr, __REG, __REG) { return __MODRM(reg_twobyte_prefix) (__CONTEXT, 0xf2, 0x5c, __xmmreg(a), __xmmreg(b)); }
