@@ -11,15 +11,6 @@ vector<string> operations;
 vector<string> operands;
 
 
-#ifndef WIN32
-void _strlwr(char* str)
-{
-	for (size_t i = 0; str[i]; i++)
-		str[i] = tolower(str[i]);
-}
-#endif
-
-
 void AddOperation(const char* name)
 {
 	operations.push_back(name);
