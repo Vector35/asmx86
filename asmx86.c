@@ -157,154 +157,142 @@ namespace x86
 	static void __fastcall DecodeCrc32(DecodeState* restrict state);
 
 
-	enum EncodingType
-	{
-		ENC_INVALID = 0,
-		ENC_TWO_BYTE, ENC_FPU,
-		ENC_NO_OPERANDS, ENC_OP_SIZE, ENC_OP_SIZE_DEF64, ENC_OP_SIZE_NO64,
-		ENC_REG_RM_8, ENC_RM_REG_8, ENC_RM_REG_8_LOCK,
-		ENC_RM_REG_16,
-		ENC_REG_RM_V, ENC_RM_REG_V, ENC_RM_REG_V_LOCK,
-		ENC_REG_RM2X_V, ENC_REG_RM_IMM_V, ENC_REG_RM_IMMSX_V,
-		ENC_REG_RM_0, ENC_REG_RM_F,
-		ENC_RM_REG_DEF64,
-		ENC_RM_REG_IMM8_V, ENC_RM_REG_CL_V,
-		ENC_EAX_IMM_8, ENC_EAX_IMM_V,
-		ENC_PUSH_POP_SEG,
-		ENC_OP_REG_V, ENC_OP_REG_V_DEF64, ENC_EAX_OP_REG_V,
-		ENC_OP_REG_IMM_8, ENC_OP_REG_IMM_V,
-		ENC_NOP,
-		ENC_IMM_V_DEF64, ENC_IMMSX_V_DEF64,
-		ENC_IMM_8, ENC_IMM_16, ENC_IMM16_IMM8,
-		ENC_EDI_DX_8_REP, ENC_EDI_DX_OP_SIZE_REP, ENC_DX_ESI_8_REP, ENC_DX_ESI_OP_SIZE_REP,
-		ENC_RELIMM_8_DEF64, ENC_RELIMM_V_DEF64,
-		ENC_RELIMM_8_ADDR_SIZE_DEF64,
-		ENC_GROUP_RM_8, ENC_GROUP_RM_V, ENC_GROUP_RM_8_LOCK,
-		ENC_GROUP_RM_0,
-		ENC_GROUP_RM_IMM_8, ENC_GROUP_RM_IMM_8_LOCK,
-		ENC_GROUP_RM_IMM_8_NO64_LOCK, ENC_GROUP_RM_IMM8_V,
-		ENC_GROUP_RM_IMM_V, ENC_GROUP_RM_IMM_V_LOCK,
-		ENC_GROUP_RM_IMMSX_V_LOCK,
-		ENC_GROUP_RM_ONE_8, ENC_GROUP_RM_ONE_V,
-		ENC_GROUP_RM_CL_8, ENC_GROUP_RM_CL_V,
-		ENC_GROUP_F6, ENC_GROUP_F7, ENC_GROUP_FF,
-		ENC_GROUP_0F00, ENC_GROUP_0F01, ENC_GROUP_0FAE, ENC_0FB8,
-		ENC_RM_SREG_V, ENC_SREG_RM_V,
-		ENC_RM_8, ENC_RM_V_DEF64,
-		ENC_FAR_IMM_NO64,
-		ENC_EAX_ADDR_8, ENC_EAX_ADDR_V, ENC_ADDR_EAX_8, ENC_ADDR_EAX_V,
-		ENC_EDI_ESI_8_REP, ENC_EDI_ESI_OP_SIZE_REP, ENC_ESI_EDI_8_REPC, ENC_ESI_EDI_OP_SIZE_REPC,
-		ENC_EDI_EAX_8_REP, ENC_EDI_EAX_OP_SIZE_REP, ENC_EAX_ESI_8_REP, ENC_EAX_ESI_OP_SIZE_REP,
-		ENC_EAX_EDI_8_REPC, ENC_EAX_EDI_OP_SIZE_REPC,
-		ENC_AL_EBX_AL,
-		ENC_EAX_IMM8_8, ENC_EAX_IMM8_V, ENC_IMM8_EAX_8, ENC_IMM8_EAX_V,
-		ENC_EAX_DX_8, ENC_EAX_DX_V, ENC_DX_EAX_8, ENC_DX_EAX_V,
-		ENC_3DNOW,
-		ENC_SSE_TABLE, ENC_SSE_TABLE_FLIP, ENC_SSE_TABLE_IMM_8, ENC_SSE_TABLE_IMM_8_FLIP,
-		ENC_SSE_TABLE_INCOP64, ENC_SSE_TABLE_INCOP64_FLIP,
-		ENC_SSE_TABLE_MEM8, ENC_SSE_TABLE_MEM8_FLIP,
-		ENC_SSE, ENC_SSE_SINGLE, ENC_SSE_PACKED, ENC_MMX, ENC_MMX_SSEONLY,
-		ENC_MMX_GROUP, ENC_PINSRW,
-		ENC_REG_CR, ENC_CR_REG,
-		ENC_MOVSXZX_8, ENC_MOVSXZX_16,
-		ENC_MEM_16, ENC_MEM_32, ENC_MEM_64, ENC_MEM_80,
-		ENC_MEM_FLOATENV, ENC_MEM_FLOATSAVE,
-		ENC_FPUREG, ENC_ST0_FPUREG, ENC_FPUREG_ST0,
-		ENC_REGGROUP_NO_OPERANDS, ENC_REGGROUP_AX,
-		ENC_CMPXCH8B, ENC_MOVNTI,
-		ENC_CRC32_8, ENC_CRC32_V,
-		ENC_COUNT
-	};
-#ifndef __cplusplus
-	typedef enum EncodingType EncodingType;
-#endif
-
-
-	struct DecodeDef
-	{
-		DecodingFunction func;
-		uint16_t flags;
-	};
-#ifndef __cplusplus
-	typedef struct DecodeDef DecodeDef;
-#endif
-
-
-	static const DecodeDef decoders[ENC_COUNT] =
-	{
-		{InvalidDecode, 0},
-		{DecodeTwoByte, 0}, {DecodeFpu, 0},
-		{DecodeNoOperands, 0}, {DecodeNoOperands, DEC_FLAG_OPERATION_OP_SIZE},
-		{DecodeNoOperands, DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_OPERATION_OP_SIZE},
-		{DecodeNoOperands, DEC_FLAG_INVALID_IN_64BIT | DEC_FLAG_OPERATION_OP_SIZE},
-		{DecodeRegRM, DEC_FLAG_BYTE}, {DecodeRegRM, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS},
-		{DecodeRegRM, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_LOCK},
-		{DecodeRegRM, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_FORCE_16BIT},
-		{DecodeRegRM, 0}, {DecodeRegRM, DEC_FLAG_FLIP_OPERANDS}, {DecodeRegRM, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_LOCK},
-		{DecodeRegRM, DEC_FLAG_REG_RM_2X_SIZE}, {DecodeRegRMImm, 0}, {DecodeRegRMImm, DEC_FLAG_IMM_SX},
-		{DecodeRegRM, DEC_FLAG_REG_RM_NO_SIZE}, {DecodeRegRM, DEC_FLAG_REG_RM_FAR_SIZE},
-		{DecodeRegRM, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_DEFAULT_TO_64BIT},
-		{DecodeRMRegImm8, 0}, {DecodeRMRegCL, 0},
-		{DecodeEaxImm, DEC_FLAG_BYTE}, {DecodeEaxImm, 0},
-		{DecodePushPopSeg, 0},
-		{DecodeOpReg, 0}, {DecodeOpReg, DEC_FLAG_DEFAULT_TO_64BIT}, {DecodeEaxOpReg, 0},
-		{DecodeOpRegImm, DEC_FLAG_BYTE}, {DecodeOpRegImm, 0},
-		{DecodeNop, 0},
-		{DecodeImm, DEC_FLAG_DEFAULT_TO_64BIT}, {DecodeImm, DEC_FLAG_IMM_SX | DEC_FLAG_DEFAULT_TO_64BIT},
-		{DecodeImm, DEC_FLAG_BYTE}, {DecodeImm, DEC_FLAG_FORCE_16BIT}, {DecodeImm16Imm8, 0},
-		{DecodeEdiDx, DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP}, {DecodeEdiDx, DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP},
-		{DecodeDxEsi, DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP}, {DecodeDxEsi, DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP},
-		{DecodeRelImm, DEC_FLAG_BYTE | DEC_FLAG_DEFAULT_TO_64BIT}, {DecodeRelImm, DEC_FLAG_DEFAULT_TO_64BIT},
-		{DecodeRelImmAddrSize, DEC_FLAG_BYTE | DEC_FLAG_DEFAULT_TO_64BIT},
-		{DecodeGroupRM, DEC_FLAG_BYTE}, {DecodeGroupRM, 0}, {DecodeGroupRM, DEC_FLAG_BYTE | DEC_FLAG_LOCK},
-		{DecodeGroupRM, DEC_FLAG_REG_RM_NO_SIZE},
-		{DecodeGroupRMImm, DEC_FLAG_BYTE}, {DecodeGroupRMImm, DEC_FLAG_BYTE | DEC_FLAG_LOCK},
-		{DecodeGroupRMImm, DEC_FLAG_BYTE | DEC_FLAG_INVALID_IN_64BIT | DEC_FLAG_LOCK},
-		{DecodeGroupRMImm8V, 0},
-		{DecodeGroupRMImm, 0}, {DecodeGroupRMImm, DEC_FLAG_LOCK}, {DecodeGroupRMImm, DEC_FLAG_IMM_SX | DEC_FLAG_LOCK},
-		{DecodeGroupRMOne, DEC_FLAG_BYTE}, {DecodeGroupRMOne, 0},
-		{DecodeGroupRMCl, DEC_FLAG_BYTE}, {DecodeGroupRMCl, 0},
-		{DecodeGroupF6F7, DEC_FLAG_BYTE | DEC_FLAG_LOCK}, {DecodeGroupF6F7, DEC_FLAG_LOCK}, {DecodeGroupFF, DEC_FLAG_LOCK},
-		{DecodeGroup0F00, 0}, {DecodeGroup0F01, 0}, {DecodeGroup0FAE, 0}, {Decode0FB8, 0},
-		{DecodeRMSRegV, 0}, {DecodeRMSRegV, DEC_FLAG_FLIP_OPERANDS},
-		{DecodeRM8, 0}, {DecodeRMV, DEC_FLAG_DEFAULT_TO_64BIT},
-		{DecodeFarImm, DEC_FLAG_INVALID_IN_64BIT},
-		{DecodeEaxAddr, DEC_FLAG_BYTE}, {DecodeEaxAddr, 0},
-		{DecodeEaxAddr, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS}, {DecodeEaxAddr, DEC_FLAG_FLIP_OPERANDS},
-		{DecodeEdiEsi, DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP}, {DecodeEdiEsi, DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP},
-		{DecodeEdiEsi, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND},
-		{DecodeEdiEsi, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND},
-		{DecodeEdiEax, DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP}, {DecodeEdiEax, DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP},
-		{DecodeEaxEsi, DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP}, {DecodeEaxEsi, DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP},
-		{DecodeEdiEax, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND},
-		{DecodeEdiEax, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND},
-		{DecodeAlEbxAl, 0},
-		{DecodeEaxImm8, DEC_FLAG_BYTE}, {DecodeEaxImm8, 0},
-		{DecodeEaxImm8, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS}, {DecodeEaxImm8, DEC_FLAG_FLIP_OPERANDS},
-		{DecodeEaxDx, DEC_FLAG_BYTE}, {DecodeEaxDx, 0},
-		{DecodeEaxDx, DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS}, {DecodeEaxDx, DEC_FLAG_FLIP_OPERANDS},
-		{Decode3DNow, 0},
-		{DecodeSSETable, 0}, {DecodeSSETable, DEC_FLAG_FLIP_OPERANDS}, {DecodeSSETableImm8, 0}, {DecodeSSETableImm8, DEC_FLAG_FLIP_OPERANDS},
-		{DecodeSSETable, DEC_FLAG_INC_OPERATION_FOR_64}, {DecodeSSETable, DEC_FLAG_INC_OPERATION_FOR_64 | DEC_FLAG_FLIP_OPERANDS},
-		{DecodeSSETableMem8, 0}, {DecodeSSETableMem8, DEC_FLAG_FLIP_OPERANDS},
-		{DecodeSSE, 0}, {DecodeSSESingle, 0}, {DecodeSSEPacked, 0}, {DecodeMMX, 0}, {DecodeMMXSSEOnly, 0},
-		{DecodeMMXGroup, 0}, {DecodePinsrw, 0},
-		{DecodeRegCR, DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_LOCK},
-		{DecodeRegCR, DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_LOCK},
-		{DecodeMovSXZX8, 0}, {DecodeMovSXZX16, 0},
-		{DecodeMem16, 0}, {DecodeMem32, 0}, {DecodeMem64, 0}, {DecodeMem80, 0},
-		{DecodeMemFloatEnv, 0}, {DecodeMemFloatSave, 0},
-		{DecodeFPUReg, 0}, {DecodeFPURegST0, DEC_FLAG_FLIP_OPERANDS}, {DecodeFPURegST0, 0},
-		{DecodeRegGroupNoOperands, 0}, {DecodeRegGroupAX, 0},
-		{DecodeCmpXch8B, 0}, {DecodeMovNti, 0},
-		{DecodeCrc32, DEC_FLAG_BYTE}, {DecodeCrc32, 0}
-	};
+// Instruction encodings, first is flags and second is decoder function
+#define ENC_INVALID 0, InvalidDecode
+#define ENC_TWO_BYTE 0, DecodeTwoByte
+#define ENC_FPU 0, DecodeFpu
+#define ENC_NO_OPERANDS 0, DecodeNoOperands
+#define ENC_OP_SIZE DEC_FLAG_OPERATION_OP_SIZE, DecodeNoOperands
+#define ENC_OP_SIZE_DEF64 DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_OPERATION_OP_SIZE, DecodeNoOperands
+#define ENC_OP_SIZE_NO64 DEC_FLAG_INVALID_IN_64BIT | DEC_FLAG_OPERATION_OP_SIZE, DecodeNoOperands
+#define ENC_REG_RM_8 DEC_FLAG_BYTE, DecodeRegRM
+#define ENC_RM_REG_8 DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS, DecodeRegRM
+#define ENC_RM_REG_8_LOCK DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_LOCK, DecodeRegRM
+#define ENC_RM_REG_16 DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_FORCE_16BIT, DecodeRegRM
+#define ENC_REG_RM_V 0, DecodeRegRM
+#define ENC_RM_REG_V DEC_FLAG_FLIP_OPERANDS, DecodeRegRM
+#define ENC_RM_REG_V_LOCK DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_LOCK, DecodeRegRM
+#define ENC_REG_RM2X_V DEC_FLAG_REG_RM_2X_SIZE, DecodeRegRM
+#define ENC_REG_RM_IMM_V 0, DecodeRegRMImm
+#define ENC_REG_RM_IMMSX_V DEC_FLAG_IMM_SX, DecodeRegRMImm
+#define ENC_REG_RM_0 DEC_FLAG_REG_RM_NO_SIZE, DecodeRegRM
+#define ENC_REG_RM_F DEC_FLAG_REG_RM_FAR_SIZE, DecodeRegRM
+#define ENC_RM_REG_DEF64 DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_DEFAULT_TO_64BIT, DecodeRegRM
+#define ENC_RM_REG_IMM8_V 0, DecodeRMRegImm8
+#define ENC_RM_REG_CL_V 0, DecodeRMRegCL
+#define ENC_EAX_IMM_8 DEC_FLAG_BYTE, DecodeEaxImm
+#define ENC_EAX_IMM_V 0, DecodeEaxImm
+#define ENC_PUSH_POP_SEG 0, DecodePushPopSeg
+#define ENC_OP_REG_V 0, DecodeOpReg
+#define ENC_OP_REG_V_DEF64 DEC_FLAG_DEFAULT_TO_64BIT, DecodeOpReg
+#define ENC_EAX_OP_REG_V 0, DecodeEaxOpReg
+#define ENC_OP_REG_IMM_8 DEC_FLAG_BYTE, DecodeOpRegImm
+#define ENC_OP_REG_IMM_V 0, DecodeOpRegImm
+#define ENC_NOP 0, DecodeNop
+#define ENC_IMM_V_DEF64 DEC_FLAG_DEFAULT_TO_64BIT, DecodeImm
+#define ENC_IMMSX_V_DEF64 DEC_FLAG_IMM_SX | DEC_FLAG_DEFAULT_TO_64BIT, DecodeImm
+#define ENC_IMM_8 DEC_FLAG_BYTE, DecodeImm
+#define ENC_IMM_16 DEC_FLAG_FORCE_16BIT, DecodeImm
+#define ENC_IMM16_IMM8 0, DecodeImm16Imm8
+#define ENC_EDI_DX_8_REP DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiDx
+#define ENC_EDI_DX_OP_SIZE_REP DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiDx
+#define ENC_DX_ESI_8_REP DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeDxEsi
+#define ENC_DX_ESI_OP_SIZE_REP DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeDxEsi
+#define ENC_RELIMM_8_DEF64 DEC_FLAG_BYTE | DEC_FLAG_DEFAULT_TO_64BIT, DecodeRelImm
+#define ENC_RELIMM_V_DEF64 DEC_FLAG_DEFAULT_TO_64BIT, DecodeRelImm
+#define ENC_RELIMM_8_ADDR_SIZE_DEF64 DEC_FLAG_BYTE | DEC_FLAG_DEFAULT_TO_64BIT, DecodeRelImmAddrSize
+#define ENC_GROUP_RM_8 DEC_FLAG_BYTE, DecodeGroupRM
+#define ENC_GROUP_RM_V 0, DecodeGroupRM
+#define ENC_GROUP_RM_8_LOCK DEC_FLAG_BYTE | DEC_FLAG_LOCK, DecodeGroupRM
+#define ENC_GROUP_RM_0 DEC_FLAG_REG_RM_NO_SIZE, DecodeGroupRM
+#define ENC_GROUP_RM_IMM_8 DEC_FLAG_BYTE, DecodeGroupRMImm
+#define ENC_GROUP_RM_IMM_8_LOCK DEC_FLAG_BYTE | DEC_FLAG_LOCK, DecodeGroupRMImm
+#define ENC_GROUP_RM_IMM_8_NO64_LOCK DEC_FLAG_BYTE | DEC_FLAG_INVALID_IN_64BIT | DEC_FLAG_LOCK, DecodeGroupRMImm
+#define ENC_GROUP_RM_IMM8_V 0, DecodeGroupRMImm8V
+#define ENC_GROUP_RM_IMM_V 0, DecodeGroupRMImm
+#define ENC_GROUP_RM_IMM_V_LOCK DEC_FLAG_LOCK, DecodeGroupRMImm
+#define ENC_GROUP_RM_IMMSX_V_LOCK DEC_FLAG_IMM_SX | DEC_FLAG_LOCK, DecodeGroupRMImm
+#define ENC_GROUP_RM_ONE_8 DEC_FLAG_BYTE, DecodeGroupRMOne
+#define ENC_GROUP_RM_ONE_V 0, DecodeGroupRMOne
+#define ENC_GROUP_RM_CL_8 DEC_FLAG_BYTE, DecodeGroupRMCl
+#define ENC_GROUP_RM_CL_V 0, DecodeGroupRMCl
+#define ENC_GROUP_F6 DEC_FLAG_BYTE | DEC_FLAG_LOCK, DecodeGroupF6F7
+#define ENC_GROUP_F7 DEC_FLAG_LOCK, DecodeGroupF6F7
+#define ENC_GROUP_FF DEC_FLAG_LOCK, DecodeGroupFF
+#define ENC_GROUP_0F00 0, DecodeGroup0F00
+#define ENC_GROUP_0F01 0, DecodeGroup0F01
+#define ENC_GROUP_0FAE 0, DecodeGroup0FAE
+#define ENC_0FB8 0, Decode0FB8
+#define ENC_RM_SREG_V 0, DecodeRMSRegV
+#define ENC_SREG_RM_V DEC_FLAG_FLIP_OPERANDS, DecodeRMSRegV
+#define ENC_RM_8 0, DecodeRM8
+#define ENC_RM_V_DEF64 DEC_FLAG_DEFAULT_TO_64BIT, DecodeRMV
+#define ENC_FAR_IMM_NO64 DEC_FLAG_INVALID_IN_64BIT, DecodeFarImm
+#define ENC_EAX_ADDR_8 DEC_FLAG_BYTE, DecodeEaxAddr
+#define ENC_EAX_ADDR_V 0, DecodeEaxAddr
+#define ENC_ADDR_EAX_8 DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS, DecodeEaxAddr
+#define ENC_ADDR_EAX_V DEC_FLAG_FLIP_OPERANDS, DecodeEaxAddr
+#define ENC_EDI_ESI_8_REP DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiEsi
+#define ENC_EDI_ESI_OP_SIZE_REP DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiEsi
+#define ENC_ESI_EDI_8_REPC DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND, DecodeEdiEsi
+#define ENC_ESI_EDI_OP_SIZE_REPC DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND, DecodeEdiEsi
+#define ENC_EDI_EAX_8_REP DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiEax
+#define ENC_EDI_EAX_OP_SIZE_REP DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEdiEax
+#define ENC_EAX_ESI_8_REP DEC_FLAG_BYTE | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEaxEsi
+#define ENC_EAX_ESI_OP_SIZE_REP DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP, DecodeEaxEsi
+#define ENC_EAX_EDI_8_REPC DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND, DecodeEdiEax
+#define ENC_EAX_EDI_OP_SIZE_REPC DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_OPERATION_OP_SIZE | DEC_FLAG_REP_COND, DecodeEdiEax
+#define ENC_AL_EBX_AL 0, DecodeAlEbxAl
+#define ENC_EAX_IMM8_8 DEC_FLAG_BYTE, DecodeEaxImm8
+#define ENC_EAX_IMM8_V 0, DecodeEaxImm8
+#define ENC_IMM8_EAX_8 DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS, DecodeEaxImm8
+#define ENC_IMM8_EAX_V DEC_FLAG_FLIP_OPERANDS, DecodeEaxImm8
+#define ENC_EAX_DX_8 DEC_FLAG_BYTE, DecodeEaxDx
+#define ENC_EAX_DX_V 0, DecodeEaxDx
+#define ENC_DX_EAX_8 DEC_FLAG_BYTE | DEC_FLAG_FLIP_OPERANDS, DecodeEaxDx
+#define ENC_DX_EAX_V DEC_FLAG_FLIP_OPERANDS, DecodeEaxDx
+#define ENC_3DNOW 0, Decode3DNow
+#define ENC_SSE_TABLE 0, DecodeSSETable
+#define ENC_SSE_TABLE_FLIP DEC_FLAG_FLIP_OPERANDS, DecodeSSETable
+#define ENC_SSE_TABLE_IMM_8 0, DecodeSSETableImm8
+#define ENC_SSE_TABLE_IMM_8_FLIP DEC_FLAG_FLIP_OPERANDS, DecodeSSETableImm8
+#define ENC_SSE_TABLE_INCOP64 DEC_FLAG_INC_OPERATION_FOR_64, DecodeSSETable
+#define ENC_SSE_TABLE_INCOP64_FLIP DEC_FLAG_INC_OPERATION_FOR_64 | DEC_FLAG_FLIP_OPERANDS, DecodeSSETable
+#define ENC_SSE_TABLE_MEM8 0, DecodeSSETableMem8
+#define ENC_SSE_TABLE_MEM8_FLIP DEC_FLAG_FLIP_OPERANDS, DecodeSSETableMem8
+#define ENC_SSE 0, DecodeSSE
+#define ENC_SSE_SINGLE 0, DecodeSSESingle
+#define ENC_SSE_PACKED 0, DecodeSSEPacked
+#define ENC_MMX 0, DecodeMMX
+#define ENC_MMX_SSEONLY 0, DecodeMMXSSEOnly
+#define ENC_MMX_GROUP 0, DecodeMMXGroup
+#define ENC_PINSRW 0, DecodePinsrw
+#define ENC_REG_CR DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_LOCK, DecodeRegCR
+#define ENC_CR_REG DEC_FLAG_FLIP_OPERANDS | DEC_FLAG_DEFAULT_TO_64BIT | DEC_FLAG_LOCK, DecodeRegCR
+#define ENC_MOVSXZX_8 0, DecodeMovSXZX8
+#define ENC_MOVSXZX_16 0, DecodeMovSXZX16
+#define ENC_MEM_16 0, DecodeMem16
+#define ENC_MEM_32 0, DecodeMem32
+#define ENC_MEM_64 0, DecodeMem64
+#define ENC_MEM_80 0, DecodeMem80
+#define ENC_MEM_FLOATENV 0, DecodeMemFloatEnv
+#define ENC_MEM_FLOATSAVE 0, DecodeMemFloatSave
+#define ENC_FPUREG 0, DecodeFPUReg
+#define ENC_ST0_FPUREG DEC_FLAG_FLIP_OPERANDS, DecodeFPURegST0
+#define ENC_FPUREG_ST0 0, DecodeFPURegST0
+#define ENC_REGGROUP_NO_OPERANDS 0, DecodeRegGroupNoOperands
+#define ENC_REGGROUP_AX 0, DecodeRegGroupAX
+#define ENC_CMPXCH8B 0, DecodeCmpXch8B
+#define ENC_MOVNTI 0, DecodeMovNti
+#define ENC_CRC32_8 DEC_FLAG_BYTE, DecodeCrc32
+#define ENC_CRC32_V 0, DecodeCrc32
 
 
 	struct InstructionEncoding
 	{
-		uint16_t operation : 9;
-		uint16_t encoding : 7;
+		uint16_t operation;
+		uint16_t flags;
+		DecodingFunction func;
 	};
 #ifndef __cplusplus
 	typedef struct InstructionEncoding InstructionEncoding;
@@ -637,9 +625,9 @@ namespace x86
 
 	struct SSETableOperationEntry
 	{
-		uint16_t operation : 10;
-		uint16_t regType : 3;
-		uint16_t rmType : 3;
+		uint16_t operation;
+		uint8_t regType;
+		uint8_t rmType;
 	};
 
 #ifndef __cplusplus
@@ -937,9 +925,9 @@ namespace x86
 
 	struct RMDef
 	{
-		OperandType first : 8;
-		OperandType second : 8;
-		SegmentRegister segment : 8;
+		OperandType first;
+		OperandType second;
+		SegmentRegister segment;
 	};
 #ifndef __cplusplus
 	typedef struct RMDef RMDef;
@@ -1189,7 +1177,7 @@ namespace x86
 	{
 		state->result->operation = (InstructionOperation)encoding->operation;
 
-		state->flags = decoders[encoding->encoding].flags;
+		state->flags = encoding->flags;
 		if (state->using64 && (state->flags & DEC_FLAG_INVALID_IN_64BIT))
 		{
 			state->invalid = true;
@@ -1234,7 +1222,7 @@ namespace x86
 				state->result->flags |= X86_FLAG_REPE;
 		}
 
-		decoders[encoding->encoding].func(state);
+		encoding->func(state);
 
 		if (state->result->operation == INVALID)
 			state->invalid = true;
@@ -2558,7 +2546,7 @@ namespace x86
 	{
 		if (plus)
 			WriteString(out, outMaxLen, "+");
-		WriteString(out, outMaxLen, &operandString[operandOffsets[type]]);
+		WriteString(out, outMaxLen, operandString[type]);
 		if (scale != 1)
 		{
 			WriteChar(out, outMaxLen, '*');
@@ -2607,7 +2595,7 @@ namespace x86
 								WriteChar(&out, &outMaxLen, 'e');
 							WriteChar(&out, &outMaxLen, ' ');
 						}
-						WriteString(&out, &outMaxLen, &operationString[operationOffsets[instr->operation]]);
+						WriteString(&out, &outMaxLen, operationString[instr->operation]);
 						for (; ((size_t)(out - operationStart) < (size_t)width) && (outMaxLen > 1); )
 							WriteChar(&out, &outMaxLen, ' ');
 						break;
