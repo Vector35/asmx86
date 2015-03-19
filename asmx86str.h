@@ -177,6 +177,7 @@ static const char* operationString[] = {
 	"movnti",
 	"movss",
 	"movsx",
+	"movsxd",
 	"movupd",
 	"movups",
 	"movzx",

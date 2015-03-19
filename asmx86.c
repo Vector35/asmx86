@@ -155,6 +155,7 @@ namespace x86
 	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state);
 	static void __fastcall DecodeMovNti(DecodeState* restrict state);
 	static void __fastcall DecodeCrc32(DecodeState* restrict state);
+	static void __fastcall DecodeArpl(DecodeState* restrict state);
 
 
 // Instruction encodings, first is flags and second is decoder function
@@ -286,6 +287,7 @@ namespace x86
 #define ENC_MOVNTI 0, DecodeMovNti
 #define ENC_CRC32_8 DEC_FLAG_BYTE, DecodeCrc32
 #define ENC_CRC32_V 0, DecodeCrc32
+#define ENC_ARPL 0, DecodeArpl
 
 
 	struct InstructionEncoding
@@ -334,7 +336,7 @@ namespace x86
 		{PUSH, ENC_OP_REG_V_DEF64}, {PUSH, ENC_OP_REG_V_DEF64}, {PUSH, ENC_OP_REG_V_DEF64}, {PUSH, ENC_OP_REG_V_DEF64}, // 0x54
 		{POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, // 0x58
 		{POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, {POP, ENC_OP_REG_V_DEF64}, // 0x5c
-		{PUSHA, ENC_OP_SIZE_NO64}, {POPA, ENC_OP_SIZE_NO64}, {BOUND, ENC_REG_RM2X_V}, {ARPL, ENC_RM_REG_16}, // 0x60
+		{PUSHA, ENC_OP_SIZE_NO64}, {POPA, ENC_OP_SIZE_NO64}, {BOUND, ENC_REG_RM2X_V}, {ARPL, ENC_ARPL}, // 0x60
 		{INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, {INVALID, ENC_INVALID}, // 0x64
 		{PUSH, ENC_IMM_V_DEF64}, {IMUL, ENC_REG_RM_IMM_V}, {PUSH, ENC_IMMSX_V_DEF64}, {IMUL, ENC_REG_RM_IMMSX_V}, // 0x68
 		{INSB, ENC_EDI_DX_8_REP}, {INSW, ENC_EDI_DX_OP_SIZE_REP}, {OUTSB, ENC_DX_ESI_8_REP}, {OUTSW, ENC_DX_ESI_OP_SIZE_REP}, // 0x6c
@@ -991,7 +993,7 @@ namespace x86
 		}
 	}
 
-	
+
 	static uint16_t __fastcall GetFinalOpSize(DecodeState* restrict state)
 	{
 		if (state->flags & DEC_FLAG_BYTE)
@@ -2309,6 +2311,26 @@ namespace x86
 	}
 
 
+	static void __fastcall DecodeArpl(DecodeState* restrict state)
+	{
+		if (state->using64)
+		{
+			// In 64-bit ARPL is repurposed to MOVSXD
+			const RegDef* regList = GetRegListForFinalOpSize(state);
+			state->result->operation = MOVSXD;
+			DecodeRMReg(state, state->operand1, reg32List, 4, state->operand0, regList, state->finalOpSize);
+		}
+		else
+		{
+			// ARPL instruction
+			state->operand0 = &state->result->operands[1];
+			state->operand1 = &state->result->operands[0];
+			state->finalOpSize = 2;
+			DecodeRegRM(state);
+		}
+	}
+
+
 	static void __fastcall ProcessPrefixes(DecodeState* restrict state)
 	{
 		uint8_t rex = 0;
@@ -2707,4 +2729,3 @@ namespace x86
 #ifdef __cplusplus
 }
 #endif
-
