@@ -1505,7 +1505,7 @@ namespace x86
 	}
 
 
-	uint16_t __fastcall GetSizeForSSEType(uint8_t type)
+	static uint16_t __fastcall GetSizeForSSEType(uint8_t type)
 	{
 		if (type == 2)
 			return 8;
@@ -1515,7 +1515,7 @@ namespace x86
 	}
 
 
-	InstructionOperand* __fastcall GetOperandForSSEEntryType(DecodeState* restrict state, uint16_t type, uint8_t operandIndex)
+	static InstructionOperand* __fastcall GetOperandForSSEEntryType(DecodeState* restrict state, uint16_t type, uint8_t operandIndex)
 	{
 		if (type == SSE_128_FLIP)
 			operandIndex = 1 - operandIndex;
@@ -1525,7 +1525,7 @@ namespace x86
 	}
 
 
-	const RegDef* __fastcall GetRegListForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static const RegDef* __fastcall GetRegListForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1540,7 +1540,7 @@ namespace x86
 	}
 
 
-	uint16_t __fastcall GetSizeForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static uint16_t __fastcall GetSizeForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1560,7 +1560,7 @@ namespace x86
 	}
 
 
-	void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16_t type)
 	{
 		if ((type == GPR_32_OR_64) && (state->opSize == 8))
 			state->result->operation = (InstructionOperation)((int)state->result->operation + 1);
