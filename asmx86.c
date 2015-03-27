@@ -21,12 +21,6 @@
 #include <stddef.h>
 #include "asmx86.h"
 
-#ifdef WIN32
-#define restrict
-#else
-#define __fastcall
-#endif
-
 #define DEC_FLAG_LOCK                   0x0020
 #define DEC_FLAG_REP                    0x0040
 #define DEC_FLAG_REP_COND               0x0080
@@ -84,78 +78,78 @@ namespace x86
 
 #include "asmx86str.h"
 
-	typedef void (__fastcall *DecodingFunction)(DecodeState* restrict state);
+	typedef void (*DecodingFunction)(DecodeState* state);
 
-	static void __fastcall InvalidDecode(DecodeState* restrict state);
-	static void __fastcall DecodeTwoByte(DecodeState* restrict state);
-	static void __fastcall DecodeFpu(DecodeState* restrict state);
-	static void __fastcall DecodeNoOperands(DecodeState* restrict state);
-	static void __fastcall DecodeRegRM(DecodeState* restrict state);
-	static void __fastcall DecodeRegRMImm(DecodeState* restrict state);
-	static void __fastcall DecodeRMRegImm8(DecodeState* restrict state);
-	static void __fastcall DecodeRMRegCL(DecodeState* restrict state);
-	static void __fastcall DecodeEaxImm(DecodeState* restrict state);
-	static void __fastcall DecodePushPopSeg(DecodeState* restrict state);
-	static void __fastcall DecodeOpReg(DecodeState* restrict state);
-	static void __fastcall DecodeEaxOpReg(DecodeState* restrict state);
-	static void __fastcall DecodeOpRegImm(DecodeState* restrict state);
-	static void __fastcall DecodeNop(DecodeState* restrict state);
-	static void __fastcall DecodeImm(DecodeState* restrict state);
-	static void __fastcall DecodeImm16Imm8(DecodeState* restrict state);
-	static void __fastcall DecodeEdiDx(DecodeState* restrict state);
-	static void __fastcall DecodeDxEsi(DecodeState* restrict state);
-	static void __fastcall DecodeRelImm(DecodeState* restrict state);
-	static void __fastcall DecodeRelImmAddrSize(DecodeState* restrict state);
-	static void __fastcall DecodeGroupRM(DecodeState* restrict state);
-	static void __fastcall DecodeGroupRMImm(DecodeState* restrict state);
-	static void __fastcall DecodeGroupRMImm8V(DecodeState* restrict state);
-	static void __fastcall DecodeGroupRMOne(DecodeState* restrict state);
-	static void __fastcall DecodeGroupRMCl(DecodeState* restrict state);
-	static void __fastcall DecodeGroupF6F7(DecodeState* restrict state);
-	static void __fastcall DecodeGroupFF(DecodeState* restrict state);
-	static void __fastcall DecodeGroup0F00(DecodeState* restrict state);
-	static void __fastcall DecodeGroup0F01(DecodeState* restrict state);
-	static void __fastcall DecodeGroup0FAE(DecodeState* restrict state);
-	static void __fastcall Decode0FB8(DecodeState* restrict state);
-	static void __fastcall DecodeRMSRegV(DecodeState* restrict state);
-	static void __fastcall DecodeRM8(DecodeState* restrict state);
-	static void __fastcall DecodeRMV(DecodeState* restrict state);
-	static void __fastcall DecodeFarImm(DecodeState* restrict state);
-	static void __fastcall DecodeEaxAddr(DecodeState* restrict state);
-	static void __fastcall DecodeEdiEsi(DecodeState* restrict state);
-	static void __fastcall DecodeEdiEax(DecodeState* restrict state);
-	static void __fastcall DecodeEaxEsi(DecodeState* restrict state);
-	static void __fastcall DecodeAlEbxAl(DecodeState* restrict state);
-	static void __fastcall DecodeEaxImm8(DecodeState* restrict state);
-	static void __fastcall DecodeEaxDx(DecodeState* restrict state);
-	static void __fastcall Decode3DNow(DecodeState* restrict state);
-	static void __fastcall DecodeSSETable(DecodeState* restrict state);
-	static void __fastcall DecodeSSETableImm8(DecodeState* restrict state);
-	static void __fastcall DecodeSSETableMem8(DecodeState* restrict state);
-	static void __fastcall DecodeSSE(DecodeState* restrict state);
-	static void __fastcall DecodeSSESingle(DecodeState* restrict state);
-	static void __fastcall DecodeSSEPacked(DecodeState* restrict state);
-	static void __fastcall DecodeMMX(DecodeState* restrict state);
-	static void __fastcall DecodeMMXSSEOnly(DecodeState* restrict state);
-	static void __fastcall DecodeMMXGroup(DecodeState* restrict state);
-	static void __fastcall DecodePinsrw(DecodeState* restrict state);
-	static void __fastcall DecodeRegCR(DecodeState* restrict state);
-	static void __fastcall DecodeMovSXZX8(DecodeState* restrict state);
-	static void __fastcall DecodeMovSXZX16(DecodeState* restrict state);
-	static void __fastcall DecodeMem16(DecodeState* restrict state);
-	static void __fastcall DecodeMem32(DecodeState* restrict state);
-	static void __fastcall DecodeMem64(DecodeState* restrict state);
-	static void __fastcall DecodeMem80(DecodeState* restrict state);
-	static void __fastcall DecodeMemFloatEnv(DecodeState* restrict state);
-	static void __fastcall DecodeMemFloatSave(DecodeState* restrict state);
-	static void __fastcall DecodeFPUReg(DecodeState* restrict state);
-	static void __fastcall DecodeFPURegST0(DecodeState* restrict state);
-	static void __fastcall DecodeRegGroupNoOperands(DecodeState* restrict state);
-	static void __fastcall DecodeRegGroupAX(DecodeState* restrict state);
-	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state);
-	static void __fastcall DecodeMovNti(DecodeState* restrict state);
-	static void __fastcall DecodeCrc32(DecodeState* restrict state);
-	static void __fastcall DecodeArpl(DecodeState* restrict state);
+	static void InvalidDecode(DecodeState* state);
+	static void DecodeTwoByte(DecodeState* state);
+	static void DecodeFpu(DecodeState* state);
+	static void DecodeNoOperands(DecodeState* state);
+	static void DecodeRegRM(DecodeState* state);
+	static void DecodeRegRMImm(DecodeState* state);
+	static void DecodeRMRegImm8(DecodeState* state);
+	static void DecodeRMRegCL(DecodeState* state);
+	static void DecodeEaxImm(DecodeState* state);
+	static void DecodePushPopSeg(DecodeState* state);
+	static void DecodeOpReg(DecodeState* state);
+	static void DecodeEaxOpReg(DecodeState* state);
+	static void DecodeOpRegImm(DecodeState* state);
+	static void DecodeNop(DecodeState* state);
+	static void DecodeImm(DecodeState* state);
+	static void DecodeImm16Imm8(DecodeState* state);
+	static void DecodeEdiDx(DecodeState* state);
+	static void DecodeDxEsi(DecodeState* state);
+	static void DecodeRelImm(DecodeState* state);
+	static void DecodeRelImmAddrSize(DecodeState* state);
+	static void DecodeGroupRM(DecodeState* state);
+	static void DecodeGroupRMImm(DecodeState* state);
+	static void DecodeGroupRMImm8V(DecodeState* state);
+	static void DecodeGroupRMOne(DecodeState* state);
+	static void DecodeGroupRMCl(DecodeState* state);
+	static void DecodeGroupF6F7(DecodeState* state);
+	static void DecodeGroupFF(DecodeState* state);
+	static void DecodeGroup0F00(DecodeState* state);
+	static void DecodeGroup0F01(DecodeState* state);
+	static void DecodeGroup0FAE(DecodeState* state);
+	static void Decode0FB8(DecodeState* state);
+	static void DecodeRMSRegV(DecodeState* state);
+	static void DecodeRM8(DecodeState* state);
+	static void DecodeRMV(DecodeState* state);
+	static void DecodeFarImm(DecodeState* state);
+	static void DecodeEaxAddr(DecodeState* state);
+	static void DecodeEdiEsi(DecodeState* state);
+	static void DecodeEdiEax(DecodeState* state);
+	static void DecodeEaxEsi(DecodeState* state);
+	static void DecodeAlEbxAl(DecodeState* state);
+	static void DecodeEaxImm8(DecodeState* state);
+	static void DecodeEaxDx(DecodeState* state);
+	static void Decode3DNow(DecodeState* state);
+	static void DecodeSSETable(DecodeState* state);
+	static void DecodeSSETableImm8(DecodeState* state);
+	static void DecodeSSETableMem8(DecodeState* state);
+	static void DecodeSSE(DecodeState* state);
+	static void DecodeSSESingle(DecodeState* state);
+	static void DecodeSSEPacked(DecodeState* state);
+	static void DecodeMMX(DecodeState* state);
+	static void DecodeMMXSSEOnly(DecodeState* state);
+	static void DecodeMMXGroup(DecodeState* state);
+	static void DecodePinsrw(DecodeState* state);
+	static void DecodeRegCR(DecodeState* state);
+	static void DecodeMovSXZX8(DecodeState* state);
+	static void DecodeMovSXZX16(DecodeState* state);
+	static void DecodeMem16(DecodeState* state);
+	static void DecodeMem32(DecodeState* state);
+	static void DecodeMem64(DecodeState* state);
+	static void DecodeMem80(DecodeState* state);
+	static void DecodeMemFloatEnv(DecodeState* state);
+	static void DecodeMemFloatSave(DecodeState* state);
+	static void DecodeFPUReg(DecodeState* state);
+	static void DecodeFPURegST0(DecodeState* state);
+	static void DecodeRegGroupNoOperands(DecodeState* state);
+	static void DecodeRegGroupAX(DecodeState* state);
+	static void DecodeCmpXch8B(DecodeState* state);
+	static void DecodeMovNti(DecodeState* state);
+	static void DecodeCrc32(DecodeState* state);
+	static void DecodeArpl(DecodeState* state);
 
 
 // Instruction encodings, first is flags and second is decoder function
@@ -936,7 +930,7 @@ namespace x86
 #endif
 
 
-	static const RegDef* __fastcall GetByteRegList(DecodeState* restrict state)
+	static const RegDef* GetByteRegList(DecodeState* state)
 	{
 		if (state->rex)
 			return reg8List64;
@@ -944,7 +938,7 @@ namespace x86
 	}
 
 
-	static const RegDef* __fastcall GetRegListForOpSize(DecodeState* restrict state)
+	static const RegDef* GetRegListForOpSize(DecodeState* state)
 	{
 		switch (state->opSize)
 		{
@@ -960,7 +954,7 @@ namespace x86
 	}
 
 
-	static const RegDef* __fastcall GetRegListForFinalOpSize(DecodeState* restrict state)
+	static const RegDef* GetRegListForFinalOpSize(DecodeState* state)
 	{
 		switch (state->finalOpSize)
 		{
@@ -978,7 +972,7 @@ namespace x86
 	}
 
 
-	static const RegDef* __fastcall GetRegListForAddrSize(DecodeState* restrict state)
+	static const RegDef* GetRegListForAddrSize(DecodeState* state)
 	{
 		switch (state->addrSize)
 		{
@@ -994,7 +988,7 @@ namespace x86
 	}
 
 
-	static uint16_t __fastcall GetFinalOpSize(DecodeState* restrict state)
+	static uint16_t GetFinalOpSize(DecodeState* state)
 	{
 		if (state->flags & DEC_FLAG_BYTE)
 			return 1;
@@ -1002,7 +996,7 @@ namespace x86
 	}
 
 
-	static uint8_t __fastcall Read8(DecodeState* restrict state)
+	static uint8_t Read8(DecodeState* state)
 	{
 		uint8_t val;
 
@@ -1021,7 +1015,7 @@ namespace x86
 	}
 
 
-	static uint8_t __fastcall Peek8(DecodeState* restrict state)
+	static uint8_t Peek8(DecodeState* state)
 	{
 		uint8_t val;
 
@@ -1039,7 +1033,7 @@ namespace x86
 	}
 
 
-	static uint16_t __fastcall Read16(DecodeState* restrict state)
+	static uint16_t Read16(DecodeState* state)
 	{
 		uint16_t val;
 
@@ -1059,7 +1053,7 @@ namespace x86
 	}
 
 
-	static uint32_t __fastcall Read32(DecodeState* restrict state)
+	static uint32_t Read32(DecodeState* state)
 	{
 		uint32_t val;
 
@@ -1079,7 +1073,7 @@ namespace x86
 	}
 
 
-	static uint64_t __fastcall Read64(DecodeState* restrict state)
+	static uint64_t Read64(DecodeState* state)
 	{
 		uint64_t val;
 
@@ -1099,25 +1093,25 @@ namespace x86
 	}
 
 
-	static int64_t __fastcall ReadSigned8(DecodeState* restrict state)
+	static int64_t ReadSigned8(DecodeState* state)
 	{
 		return (int64_t)(int8_t)Read8(state);
 	}
 
 
-	static int64_t __fastcall ReadSigned16(DecodeState* restrict state)
+	static int64_t ReadSigned16(DecodeState* state)
 	{
 		return (int64_t)(int16_t)Read16(state);
 	}
 
 
-	static int64_t __fastcall ReadSigned32(DecodeState* restrict state)
+	static int64_t ReadSigned32(DecodeState* state)
 	{
 		return (int64_t)(int32_t)Read32(state);
 	}
 
 
-	static int64_t __fastcall ReadFinalOpSize(DecodeState* restrict state)
+	static int64_t ReadFinalOpSize(DecodeState* state)
 	{
 		if (state->flags & DEC_FLAG_IMM_SX)
 			return ReadSigned8(state);
@@ -1136,7 +1130,7 @@ namespace x86
 	}
 
 
-	static int64_t __fastcall ReadAddrSize(DecodeState* restrict state)
+	static int64_t ReadAddrSize(DecodeState* state)
 	{
 		switch (state->addrSize)
 		{
@@ -1150,7 +1144,7 @@ namespace x86
 	}
 
 
-	static int64_t __fastcall ReadSignedFinalOpSize(DecodeState* restrict state)
+	static int64_t ReadSignedFinalOpSize(DecodeState* state)
 	{
 		switch (state->finalOpSize)
 		{
@@ -1166,7 +1160,7 @@ namespace x86
 	}
 
 
-	static void __fastcall UpdateOperationForAddrSize(DecodeState* restrict state)
+	static void UpdateOperationForAddrSize(DecodeState* state)
 	{
 		if (state->addrSize == 4)
 			state->result->operation = (InstructionOperation)(state->result->operation + 1);
@@ -1175,7 +1169,7 @@ namespace x86
 	}
 
 
-	static void __fastcall ProcessEncoding(DecodeState* restrict state, const InstructionEncoding* encoding)
+	static void ProcessEncoding(DecodeState* state, const InstructionEncoding* encoding)
 	{
 		state->result->operation = (InstructionOperation)encoding->operation;
 
@@ -1242,13 +1236,13 @@ namespace x86
 	}
 
 
-	static void __fastcall ProcessOpcode(DecodeState* restrict state, const InstructionEncoding* map, uint8_t opcode)
+	static void ProcessOpcode(DecodeState* state, const InstructionEncoding* map, uint8_t opcode)
 	{
 		ProcessEncoding(state, &map[opcode]);
 	}
 
 
-	static void __fastcall ProcessSparseOpcode(DecodeState* restrict state, const SparseInstructionEncoding* map, size_t mapSize, uint8_t opcode)
+	static void ProcessSparseOpcode(DecodeState* state, const SparseInstructionEncoding* map, size_t mapSize, uint8_t opcode)
 	{
 		int i, min, max;
 		state->result->operation = INVALID;
@@ -1268,13 +1262,13 @@ namespace x86
 	}
 
 
-	static SegmentRegister __fastcall GetFinalSegment(DecodeState* restrict state, SegmentRegister seg)
+	static SegmentRegister GetFinalSegment(DecodeState* state, SegmentRegister seg)
 	{
 		return (state->result->segment == SEG_DEFAULT) ? seg : state->result->segment;
 	}
 
 
-	static void __fastcall SetMemOperand(DecodeState* restrict state, InstructionOperand* oper, const RMDef* def, int64_t immed)
+	static void SetMemOperand(DecodeState* state, InstructionOperand* oper, const RMDef* def, int64_t immed)
 	{
 		oper->operand = MEM;
 		oper->components[0] = def->first;
@@ -1284,7 +1278,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRM(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* regList, uint16_t rmSize, uint8_t* regOper)
+	static void DecodeRM(DecodeState* state, InstructionOperand* rmOper, const RegDef* regList, uint16_t rmSize, uint8_t* regOper)
 	{
 		uint8_t rmByte = Read8(state);
 		uint8_t mod = rmByte >> 6;
@@ -1400,7 +1394,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRMReg(DecodeState* restrict state, InstructionOperand* rmOper, const RegDef* rmRegList, uint16_t rmSize,
+	static void DecodeRMReg(DecodeState* state, InstructionOperand* rmOper, const RegDef* rmRegList, uint16_t rmSize,
 		InstructionOperand* regOper, const RegDef* regList, uint16_t regSize)
 	{
 		uint8_t reg;
@@ -1414,7 +1408,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToEsEdi(DecodeState* restrict state, InstructionOperand* oper, uint16_t size)
+	static void SetOperandToEsEdi(DecodeState* state, InstructionOperand* oper, uint16_t size)
 	{
 		const RegDef* addrRegList = GetRegListForAddrSize(state);
 		oper->operand = MEM;
@@ -1424,7 +1418,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToDsEsi(DecodeState* restrict state, InstructionOperand* oper, uint16_t size)
+	static void SetOperandToDsEsi(DecodeState* state, InstructionOperand* oper, uint16_t size)
 	{
 		const RegDef* addrRegList = GetRegListForAddrSize(state);
 		oper->operand = MEM;
@@ -1434,7 +1428,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToImmAddr(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToImmAddr(DecodeState* state, InstructionOperand* oper)
 	{
 		oper->operand = MEM;
 		oper->immediate = ReadAddrSize(state);
@@ -1443,7 +1437,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToEaxFinalOpSize(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToEaxFinalOpSize(DecodeState* state, InstructionOperand* oper)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		oper->operand = (OperandType)regList[0];
@@ -1451,7 +1445,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToOpReg(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToOpReg(DecodeState* state, InstructionOperand* oper)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		uint8_t regOffset = state->rexRM1 ? 8 : 0;
@@ -1460,7 +1454,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToImm(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToImm(DecodeState* state, InstructionOperand* oper)
 	{
 		oper->operand = IMM;
 		oper->size = state->finalOpSize;
@@ -1468,7 +1462,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToImm8(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToImm8(DecodeState* state, InstructionOperand* oper)
 	{
 		oper->operand = IMM;
 		oper->size = 1;
@@ -1476,7 +1470,7 @@ namespace x86
 	}
 
 
-	static void __fastcall SetOperandToImm16(DecodeState* restrict state, InstructionOperand* oper)
+	static void SetOperandToImm16(DecodeState* state, InstructionOperand* oper)
 	{
 		oper->operand = IMM;
 		oper->size = 2;
@@ -1484,7 +1478,7 @@ namespace x86
 	}
 
 
-	static uint8_t __fastcall DecodeSSEPrefix(DecodeState* restrict state)
+	static uint8_t DecodeSSEPrefix(DecodeState* state)
 	{
 		if (state->opPrefix)
 		{
@@ -1505,7 +1499,7 @@ namespace x86
 	}
 
 
-	static uint16_t __fastcall GetSizeForSSEType(uint8_t type)
+	static uint16_t GetSizeForSSEType(uint8_t type)
 	{
 		if (type == 2)
 			return 8;
@@ -1515,7 +1509,7 @@ namespace x86
 	}
 
 
-	static InstructionOperand* __fastcall GetOperandForSSEEntryType(DecodeState* restrict state, uint16_t type, uint8_t operandIndex)
+	static InstructionOperand* GetOperandForSSEEntryType(DecodeState* state, uint16_t type, uint8_t operandIndex)
 	{
 		if (type == SSE_128_FLIP)
 			operandIndex = 1 - operandIndex;
@@ -1525,7 +1519,7 @@ namespace x86
 	}
 
 
-	static const RegDef* __fastcall GetRegListForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static const RegDef* GetRegListForSSEEntryType(DecodeState* state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1540,7 +1534,7 @@ namespace x86
 	}
 
 
-	static uint16_t __fastcall GetSizeForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static uint16_t GetSizeForSSEEntryType(DecodeState* state, uint16_t type)
 	{
 		switch (type)
 		{
@@ -1560,20 +1554,20 @@ namespace x86
 	}
 
 
-	static void __fastcall UpdateOperationForSSEEntryType(DecodeState* restrict state, uint16_t type)
+	static void UpdateOperationForSSEEntryType(DecodeState* state, uint16_t type)
 	{
 		if ((type == GPR_32_OR_64) && (state->opSize == 8))
 			state->result->operation = (InstructionOperation)((int)state->result->operation + 1);
 	}
 
 
-	static void __fastcall InvalidDecode(DecodeState* restrict state)
+	static void InvalidDecode(DecodeState* state)
 	{
 		state->invalid = true;
 	}
 
 
-	static void __fastcall DecodeTwoByte(DecodeState* restrict state)
+	static void DecodeTwoByte(DecodeState* state)
 	{
 		uint8_t opcode = Read8(state);
 		if (opcode == 0x38)
@@ -1588,7 +1582,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeFpu(DecodeState* restrict state)
+	static void DecodeFpu(DecodeState* state)
 	{
 		uint8_t modRM = Peek8(state);
 		uint8_t reg = (modRM >> 3) & 7;
@@ -1603,12 +1597,12 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeNoOperands(DecodeState* restrict state)
+	static void DecodeNoOperands(DecodeState* state)
 	{
 	}
 
 
-	static void __fastcall DecodeRegRM(DecodeState* restrict state)
+	static void DecodeRegRM(DecodeState* state)
 	{
 		uint16_t size = state->finalOpSize;
 		const RegDef* regList = GetRegListForFinalOpSize(state);
@@ -1634,7 +1628,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRegRMImm(DecodeState* restrict state)
+	static void DecodeRegRMImm(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		DecodeRMReg(state, state->operand1, regList, state->finalOpSize, state->operand0, regList, state->finalOpSize);
@@ -1642,7 +1636,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRMRegImm8(DecodeState* restrict state)
+	static void DecodeRMRegImm8(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		DecodeRMReg(state, state->operand0, regList, state->finalOpSize, state->operand1, regList, state->finalOpSize);
@@ -1650,7 +1644,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRMRegCL(DecodeState* restrict state)
+	static void DecodeRMRegCL(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		DecodeRMReg(state, state->operand0, regList, state->finalOpSize, state->operand1, regList, state->finalOpSize);
@@ -1659,14 +1653,14 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeEaxImm(DecodeState* restrict state)
+	static void DecodeEaxImm(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		SetOperandToImm(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodePushPopSeg(DecodeState* restrict state)
+	static void DecodePushPopSeg(DecodeState* state)
 	{
 		int8_t offset = 0;
 		if (state->opcode[-1] >= 0xa0) // FS/GS
@@ -1676,20 +1670,20 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeOpReg(DecodeState* restrict state)
+	static void DecodeOpReg(DecodeState* state)
 	{
 		SetOperandToOpReg(state, state->operand0);
 	}
 
 
-	static void __fastcall DecodeEaxOpReg(DecodeState* restrict state)
+	static void DecodeEaxOpReg(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		SetOperandToOpReg(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeOpRegImm(DecodeState* restrict state)
+	static void DecodeOpRegImm(DecodeState* state)
 	{
 		SetOperandToOpReg(state, state->operand0);
 		state->operand1->operand = IMM;
@@ -1698,7 +1692,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeNop(DecodeState* restrict state)
+	static void DecodeNop(DecodeState* state)
 	{
 		if (state->rexRM1)
 		{
@@ -1708,20 +1702,20 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeImm(DecodeState* restrict state)
+	static void DecodeImm(DecodeState* state)
 	{
 		SetOperandToImm(state, state->operand0);
 	}
 
 
-	static void __fastcall DecodeImm16Imm8(DecodeState* restrict state)
+	static void DecodeImm16Imm8(DecodeState* state)
 	{
 		SetOperandToImm16(state, state->operand0);
 		SetOperandToImm8(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeEdiDx(DecodeState* restrict state)
+	static void DecodeEdiDx(DecodeState* state)
 	{
 		SetOperandToEsEdi(state, state->operand0, state->finalOpSize);
 		state->operand1->operand = REG_DX;
@@ -1729,7 +1723,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeDxEsi(DecodeState* restrict state)
+	static void DecodeDxEsi(DecodeState* state)
 	{
 		state->operand0->operand = REG_DX;
 		state->operand0->size = 2;
@@ -1737,7 +1731,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRelImm(DecodeState* restrict state)
+	static void DecodeRelImm(DecodeState* state)
 	{
 		state->operand0->operand = IMM;
 		state->operand0->size = state->opSize;
@@ -1746,14 +1740,14 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRelImmAddrSize(DecodeState* restrict state)
+	static void DecodeRelImmAddrSize(DecodeState* state)
 	{
 		DecodeRelImm(state);
 		UpdateOperationForAddrSize(state);
 	}
 
 
-	static void __fastcall DecodeGroupRM(DecodeState* restrict state)
+	static void DecodeGroupRM(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForFinalOpSize(state);
 		uint8_t regField;
@@ -1762,21 +1756,21 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroupRMImm(DecodeState* restrict state)
+	static void DecodeGroupRMImm(DecodeState* state)
 	{
 		DecodeGroupRM(state);
 		SetOperandToImm(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeGroupRMImm8V(DecodeState* restrict state)
+	static void DecodeGroupRMImm8V(DecodeState* state)
 	{
 		DecodeGroupRM(state);
 		SetOperandToImm8(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeGroupRMOne(DecodeState* restrict state)
+	static void DecodeGroupRMOne(DecodeState* state)
 	{
 		DecodeGroupRM(state);
 		state->operand1->operand = IMM;
@@ -1785,7 +1779,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroupRMCl(DecodeState* restrict state)
+	static void DecodeGroupRMCl(DecodeState* state)
 	{
 		DecodeGroupRM(state);
 		state->operand1->operand = REG_CL;
@@ -1793,7 +1787,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroupF6F7(DecodeState* restrict state)
+	static void DecodeGroupF6F7(DecodeState* state)
 	{
 		DecodeGroupRM(state);
 		if (state->result->operation == TEST)
@@ -1804,7 +1798,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroupFF(DecodeState* restrict state)
+	static void DecodeGroupFF(DecodeState* state)
 	{
 		if (state->using64)
 		{
@@ -1828,7 +1822,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroup0F00(DecodeState* restrict state)
+	static void DecodeGroup0F00(DecodeState* state)
 	{
 		uint8_t rm = Peek8(state);
 		uint8_t regField = (rm >> 3) & 7;
@@ -1838,7 +1832,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroup0F01(DecodeState* restrict state)
+	static void DecodeGroup0F01(DecodeState* state)
 	{
 		uint8_t rm = Peek8(state);
 		uint8_t modField = (rm >> 6) & 3;
@@ -1861,7 +1855,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeGroup0FAE(DecodeState* restrict state)
+	static void DecodeGroup0FAE(DecodeState* state)
 	{
 		uint8_t rm = Peek8(state);
 		uint8_t modField = (rm >> 6) & 3;
@@ -1883,7 +1877,7 @@ namespace x86
 	}
 
 
-	static void __fastcall Decode0FB8(DecodeState* restrict state)
+	static void Decode0FB8(DecodeState* state)
 	{
 		if (state->rep != REP_PREFIX_REPE)
 		{
@@ -1898,7 +1892,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRMSRegV(DecodeState* restrict state)
+	static void DecodeRMSRegV(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForOpSize(state);
 		uint8_t regField;
@@ -1912,56 +1906,56 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRM8(DecodeState* restrict state)
+	static void DecodeRM8(DecodeState* state)
 	{
 		const RegDef* regList = GetByteRegList(state);
 		DecodeRM(state, state->operand0, regList, 1, NULL);
 	}
 
 
-	static void __fastcall DecodeRMV(DecodeState* restrict state)
+	static void DecodeRMV(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForOpSize(state);
 		DecodeRM(state, state->operand0, regList, state->opSize, NULL);
 	}
 
 
-	static void __fastcall DecodeFarImm(DecodeState* restrict state)
+	static void DecodeFarImm(DecodeState* state)
 	{
 		SetOperandToImm(state, state->operand1);
 		SetOperandToImm16(state, state->operand0);
 	}
 
 
-	static void __fastcall DecodeEaxAddr(DecodeState* restrict state)
+	static void DecodeEaxAddr(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		SetOperandToImmAddr(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeEdiEsi(DecodeState* restrict state)
+	static void DecodeEdiEsi(DecodeState* state)
 	{
 		SetOperandToEsEdi(state, state->operand0, state->finalOpSize);
 		SetOperandToDsEsi(state, state->operand1, state->finalOpSize);
 	}
 
 
-	static void __fastcall DecodeEdiEax(DecodeState* restrict state)
+	static void DecodeEdiEax(DecodeState* state)
 	{
 		SetOperandToEsEdi(state, state->operand0, state->finalOpSize);
 		SetOperandToEaxFinalOpSize(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeEaxEsi(DecodeState* restrict state)
+	static void DecodeEaxEsi(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		SetOperandToDsEsi(state, state->operand1, state->finalOpSize);
 	}
 
 
-	static void __fastcall DecodeAlEbxAl(DecodeState* restrict state)
+	static void DecodeAlEbxAl(DecodeState* state)
 	{
 		const RegDef* regList = GetRegListForAddrSize(state);
 		state->operand0->operand = REG_AL;
@@ -1974,14 +1968,14 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeEaxImm8(DecodeState* restrict state)
+	static void DecodeEaxImm8(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		SetOperandToImm8(state, state->operand1);
 	}
 
 
-	static void __fastcall DecodeEaxDx(DecodeState* restrict state)
+	static void DecodeEaxDx(DecodeState* state)
 	{
 		SetOperandToEaxFinalOpSize(state, state->operand0);
 		state->operand1->operand = REG_DX;
@@ -1989,7 +1983,7 @@ namespace x86
 	}
 
 
-	static void __fastcall Decode3DNow(DecodeState* restrict state)
+	static void Decode3DNow(DecodeState* state)
 	{
 		uint8_t op;
 		int i, min, max;
@@ -2012,7 +2006,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeSSETable(DecodeState* restrict state)
+	static void DecodeSSETable(DecodeState* state)
 	{
 		uint8_t type = DecodeSSEPrefix(state);
 		uint8_t rm = Peek8(state);
@@ -2039,14 +2033,14 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeSSETableImm8(DecodeState* restrict state)
+	static void DecodeSSETableImm8(DecodeState* state)
 	{
 		DecodeSSETable(state);
 		SetOperandToImm8(state, &state->result->operands[2]);
 	}
 
 
-	static void __fastcall DecodeSSETableMem8(DecodeState* restrict state)
+	static void DecodeSSETableMem8(DecodeState* state)
 	{
 		DecodeSSETable(state);
 		if (state->operand0->operand == MEM)
@@ -2056,7 +2050,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeSSE(DecodeState* restrict state)
+	static void DecodeSSE(DecodeState* state)
 	{
 		uint8_t type = DecodeSSEPrefix(state);
 		uint8_t rm = Peek8(state);
@@ -2072,7 +2066,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeSSESingle(DecodeState* restrict state)
+	static void DecodeSSESingle(DecodeState* state)
 	{
 		uint8_t type = DecodeSSEPrefix(state);
 
@@ -2087,7 +2081,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeSSEPacked(DecodeState* restrict state)
+	static void DecodeSSEPacked(DecodeState* state)
 	{
 		uint8_t type = DecodeSSEPrefix(state);
 
@@ -2102,7 +2096,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMMX(DecodeState* restrict state)
+	static void DecodeMMX(DecodeState* state)
 	{
 		if (state->opPrefix)
 			DecodeRMReg(state, state->operand1, xmmRegList, 16, state->operand0, xmmRegList, 16);
@@ -2111,7 +2105,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMMXSSEOnly(DecodeState* restrict state)
+	static void DecodeMMXSSEOnly(DecodeState* state)
 	{
 		if (state->opPrefix)
 			DecodeRMReg(state, state->operand1, xmmRegList, 16, state->operand0, xmmRegList, 16);
@@ -2120,7 +2114,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMMXGroup(DecodeState* restrict state)
+	static void DecodeMMXGroup(DecodeState* state)
 	{
 		uint8_t regField;
 		if (state->opPrefix)
@@ -2137,7 +2131,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodePinsrw(DecodeState* restrict state)
+	static void DecodePinsrw(DecodeState* state)
 	{
 		DecodeSSETableImm8(state);
 		if (state->operand1->operand == MEM)
@@ -2145,7 +2139,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRegCR(DecodeState* restrict state)
+	static void DecodeRegCR(DecodeState* state)
 	{
 		const RegDef* regList;
 		uint8_t reg;
@@ -2167,19 +2161,19 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMovSXZX8(DecodeState* restrict state)
+	static void DecodeMovSXZX8(DecodeState* state)
 	{
 		DecodeRMReg(state, state->operand1, GetByteRegList(state), 1, state->operand0, GetRegListForOpSize(state), state->opSize);
 	}
 
 
-	static void __fastcall DecodeMovSXZX16(DecodeState* restrict state)
+	static void DecodeMovSXZX16(DecodeState* state)
 	{
 		DecodeRMReg(state, state->operand1, reg16List, 2, state->operand0, GetRegListForOpSize(state), state->opSize);
 	}
 
 
-	static void __fastcall DecodeMem16(DecodeState* restrict state)
+	static void DecodeMem16(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, 2, NULL);
 		if (state->operand0->operand != MEM)
@@ -2187,7 +2181,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMem32(DecodeState* restrict state)
+	static void DecodeMem32(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, 4, NULL);
 		if (state->operand0->operand != MEM)
@@ -2195,7 +2189,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMem64(DecodeState* restrict state)
+	static void DecodeMem64(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, 8, NULL);
 		if (state->operand0->operand != MEM)
@@ -2203,7 +2197,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMem80(DecodeState* restrict state)
+	static void DecodeMem80(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, 10, NULL);
 		if (state->operand0->operand != MEM)
@@ -2211,7 +2205,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMemFloatEnv(DecodeState* restrict state)
+	static void DecodeMemFloatEnv(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, (state->opSize == 2) ? 14 : 28, NULL);
 		if (state->operand0->operand != MEM)
@@ -2219,7 +2213,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMemFloatSave(DecodeState* restrict state)
+	static void DecodeMemFloatSave(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, reg32List, (state->opSize == 2) ? 94 : 108, NULL);
 		if (state->operand0->operand != MEM)
@@ -2227,13 +2221,13 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeFPUReg(DecodeState* restrict state)
+	static void DecodeFPUReg(DecodeState* state)
 	{
 		DecodeRM(state, state->operand0, fpuRegList, 10, NULL);
 	}
 
 
-	static void __fastcall DecodeFPURegST0(DecodeState* restrict state)
+	static void DecodeFPURegST0(DecodeState* state)
 	{
 		DecodeFPUReg(state);
 		state->operand1->operand = REG_ST0;
@@ -2241,14 +2235,14 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeRegGroupNoOperands(DecodeState* restrict state)
+	static void DecodeRegGroupNoOperands(DecodeState* state)
 	{
 		uint8_t rmByte = Read8(state);
 		state->result->operation = (InstructionOperation)groupOperations[(int)state->result->operation][rmByte & 7];
 	}
 
 
-	static void __fastcall DecodeRegGroupAX(DecodeState* restrict state)
+	static void DecodeRegGroupAX(DecodeState* state)
 	{
 		DecodeRegGroupNoOperands(state);
 		state->operand0->operand = REG_AX;
@@ -2256,7 +2250,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeCmpXch8B(DecodeState* restrict state)
+	static void DecodeCmpXch8B(DecodeState* state)
 	{
 		uint8_t rm = Peek8(state);
 		uint8_t regField = (rm >> 3) & 7;
@@ -2292,7 +2286,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeMovNti(DecodeState* restrict state)
+	static void DecodeMovNti(DecodeState* state)
 	{
 		if (state->opSize == 2)
 			state->opSize = 4;
@@ -2302,7 +2296,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeCrc32(DecodeState* restrict state)
+	static void DecodeCrc32(DecodeState* state)
 	{
 		const RegDef* srcRegList = GetRegListForFinalOpSize(state);
 		const RegDef* destRegList = (state->opSize == 8) ? reg64List : reg32List;
@@ -2311,7 +2305,7 @@ namespace x86
 	}
 
 
-	static void __fastcall DecodeArpl(DecodeState* restrict state)
+	static void DecodeArpl(DecodeState* state)
 	{
 		if (state->using64)
 		{
@@ -2331,7 +2325,7 @@ namespace x86
 	}
 
 
-	static void __fastcall ProcessPrefixes(DecodeState* restrict state)
+	static void ProcessPrefixes(DecodeState* state)
 	{
 		uint8_t rex = 0;
 		bool addrPrefix = false;
@@ -2401,7 +2395,7 @@ namespace x86
 	}
 
 
-	static void __fastcall ClearOperand(InstructionOperand* oper)
+	static void ClearOperand(InstructionOperand* oper)
 	{
 		oper->operand = NONE;
 		oper->components[0] = NONE;
@@ -2411,7 +2405,7 @@ namespace x86
 	}
 
 
-	static void __fastcall InitDisassemble(DecodeState* restrict state)
+	static void InitDisassemble(DecodeState* state)
 	{
 		ClearOperand(&state->result->operands[0]);
 		ClearOperand(&state->result->operands[1]);
@@ -2432,7 +2426,7 @@ namespace x86
 	}
 
 
-	static void __fastcall FinishDisassemble(DecodeState* restrict state)
+	static void FinishDisassemble(DecodeState* state)
 	{
 		state->result->length = state->opcode - state->opcodeStart;
 		if (state->ripRelFixup)
@@ -2502,7 +2496,7 @@ namespace x86
 	}
 
 
-	static void __fastcall WriteChar(char** out, size_t* outMaxLen, char ch)
+	static void WriteChar(char** out, size_t* outMaxLen, char ch)
 	{
 		if (*outMaxLen > 1)
 		{
@@ -2512,14 +2506,14 @@ namespace x86
 	}
 
 
-	static void __fastcall WriteString(char** out, size_t* outMaxLen, const char* str)
+	static void WriteString(char** out, size_t* outMaxLen, const char* str)
 	{
 		for (; *str; str++)
 			WriteChar(out, outMaxLen, *str);
 	}
 
 
-	static void __fastcall WriteHex(char** out, size_t* outMaxLen, uint64_t val, uint32_t width, bool prefix)
+	static void WriteHex(char** out, size_t* outMaxLen, uint64_t val, uint32_t width, bool prefix)
 	{
 		char temp[17];
 		int32_t i;
@@ -2540,7 +2534,7 @@ namespace x86
 	}
 
 
-	static const char* __fastcall GetSizeString(uint16_t size)
+	static const char* GetSizeString(uint16_t size)
 	{
 		switch (size)
 		{
@@ -2564,7 +2558,7 @@ namespace x86
 	}
 
 
-	static void __fastcall WriteOperand(char** out, size_t* outMaxLen, OperandType type, uint8_t scale, bool plus)
+	static void WriteOperand(char** out, size_t* outMaxLen, OperandType type, uint8_t scale, bool plus)
 	{
 		if (plus)
 			WriteString(out, outMaxLen, "+");
