@@ -2147,9 +2147,9 @@ namespace x86
 			state->opSize = 4;
 		regList = GetRegListForOpSize(state);
 		reg = Read8(state);
-		if (state->flags & X86_FLAG_LOCK)
+		if (state->result->flags & X86_FLAG_LOCK)
 		{
-			state->flags &= ~X86_FLAG_LOCK;
+			state->result->flags &= ~X86_FLAG_LOCK;
 			state->rexReg = true;
 		}
 		state->operand0->operand = regList[(reg & 7) + (state->rexRM1 ? 8 : 0)];
@@ -2354,7 +2354,7 @@ namespace x86
 				state->result->flags |= X86_FLAG_ADDRSIZE;
 			}
 			else if (prefix == 0xf0)
-				state->flags |= X86_FLAG_LOCK;
+				state->result->flags |= X86_FLAG_LOCK;
 			else if (prefix == 0xf2)
 				state->rep = REP_PREFIX_REPNE;
 			else if (prefix == 0xf3)
@@ -2611,6 +2611,8 @@ namespace x86
 								WriteChar(&out, &outMaxLen, 'e');
 							WriteChar(&out, &outMaxLen, ' ');
 						}
+						if (instr->flags & X86_FLAG_LOCK)
+							WriteString(&out, &outMaxLen, "lock ");
 						WriteString(&out, &outMaxLen, operationString[instr->operation]);
 						for (; ((size_t)(out - operationStart) < (size_t)width) && (outMaxLen > 1); )
 							WriteChar(&out, &outMaxLen, ' ');
