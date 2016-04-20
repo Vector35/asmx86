@@ -1367,7 +1367,10 @@ namespace x86
 					{
 						rmOper->immediate = ReadSigned32(state);
 						if (state->addrSize == 8)
+						{
 							state->ripRelFixup = &rmOper->immediate;
+							rmOper->relative = true;
+						}
 					}
 					else
 						rmOper->components[0] = (OperandType)addrRegList[rm + rmReg1Offset];
@@ -2402,6 +2405,7 @@ namespace x86
 		oper->components[1] = NONE;
 		oper->scale = 1;
 		oper->immediate = 0;
+		oper->relative = false;
 	}
 
 

@@ -211,6 +211,7 @@ namespace asmx86
 		uint16_t size;
 		int64_t immediate;
 		SegmentRegister segment;
+		bool relative;
 	};
 #ifndef __cplusplus
 	typedef struct InstructionOperand InstructionOperand;
