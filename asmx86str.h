@@ -619,7 +619,15 @@ static const char* operationString[] = {
 	"vmxoff",
 	"vmxon",
 	"xgetbv",
-	"xsetbv"
+	"xsetbv",
+	"clac",
+	"stac",
+	"encls",
+	"vmfunc",
+	"xend",
+	"xtext",
+	"enclu",
+	"rdtscp"
 };
 static const char* operandString[] = {
 	"",
