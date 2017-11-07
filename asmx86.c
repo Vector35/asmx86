@@ -1810,6 +1810,8 @@ namespace x86
 			uint8_t regField = (rm >> 3) & 7;
 			if ((regField >= 2) && (regField <= 5))
 				state->finalOpSize = state->opSize = state->opPrefix ? 4 : 8;
+			else if (regField == 6)
+				state->finalOpSize = state->opSize = 8; // Prefix doesn't matter for 64 bit push
 		}
 		DecodeGroupRM(state);
 		// Check for valid far jump/call semantics
