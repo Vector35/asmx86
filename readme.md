@@ -1,3 +1,7 @@
+## Warning 
+
+Note that this project is no longer under active use. Binary Ninja does not use this for disassembly since August of 2018. 
+
 # asmx86
 This project is a disassembler library designed for emulation or automated analysis of x86 instructions. The primary output format of the disassembly is not text-based like most disassemblers. This library disassembles instructions to a structure containing the instruction mnemonic and the operands, which are in turn broken out into their components. Instruction mnemonics and operands are represented using an enumeration. This allows easier analysis or emulation of the instruction without costly parsing or string compares.
 
