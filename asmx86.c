@@ -1867,7 +1867,7 @@ namespace x86
 		uint8_t modField = (rm >> 6) & 3;
 		uint8_t regField = (rm >> 3) & 7;
 
-		if (((rm & 0xf8) == 0xe8) || ((rm & 0xf8) == 0xef8) || ((rm & 0xf8) == 0xf0))
+		if (((rm & 0xf8) == 0xe8) || ((rm & 0xf8) == 0xf8) || ((rm & 0xf8) == 0xf0))
 		{
 			state->result->operation = (InstructionOperation)groupOperations[(int)state->result->operation + 1][regField];
 			Read8(state);
