@@ -612,6 +612,7 @@ namespace x86
 		SSE_16,
 		SSE_32,
 		SSE_64,
+		SSE_64_FLIP,
 		SSE_128,
 		SSE_128_FLIP,
 		GPR_32_OR_64,
@@ -744,7 +745,7 @@ namespace x86
 		},
 		{ // Entry 25
 			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}},
-			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}}
+			{{MOVD, MMX_64, GPR_32_OR_64}, {MOVD, SSE_128, GPR_32_OR_64}, {INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_64_FLIP}}
 		},
 		{ // Entry 26
 			{{CMPPS, SSE_128, SSE_128}, {CMPPD, SSE_128, SSE_128}, {CMPSD, SSE_128, SSE_128}, {CMPSS, SSE_128, SSE_128}},
@@ -768,7 +769,7 @@ namespace x86
 		},
 		{ // Entry 31
 			{{INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}, {MOVDQ2Q, MMX_64, SSE_128}, {MOVQ2DQ, SSE_128, MMX_64}},
-			{{INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_128_FLIP}, {INVALID, 0, 0}, {INVALID, 0, 0}}
+			{{INVALID, 0, 0}, {MOVQ, SSE_128_FLIP, SSE_64_FLIP}, {INVALID, 0, 0}, {INVALID, 0, 0}}
 		},
 		{ // Entry 32
 			{{PMOVMSKB, GPR_32_OR_64, MMX_64}, {PMOVMSKB, GPR_32_OR_64, SSE_128}, {INVALID, 0, 0}, {INVALID, 0, 0}},
@@ -1514,8 +1515,9 @@ namespace x86
 
 	static InstructionOperand* GetOperandForSSEEntryType(DecodeState* state, uint16_t type, uint8_t operandIndex)
 	{
-		if (type == SSE_128_FLIP)
+		if (type == SSE_128_FLIP || type == SSE_64_FLIP) {
 			operandIndex = 1 - operandIndex;
+		}
 		if (operandIndex == 0)
 			return state->operand0;
 		return state->operand1;
@@ -1548,6 +1550,7 @@ namespace x86
 			return 4;
 		case SSE_64:
 		case MMX_64:
+		case SSE_64_FLIP:
 			return 8;
 		case GPR_32_OR_64:
 			return (state->opSize == 8) ? 8 : 4;
