@@ -40,14 +40,14 @@ if len(sys.argv) > 2:
 else:
 	out = sys.stdout
 
-out.write("static const char* operationString[] = {\n");
+out.write("static const char* operationString[] = {\n")
 for i in xrange(0, len(operation_list)):
 	if i > 0:
 		out.write(",\n")
 	out.write('\t"%s"' % operation_list[i])
 out.write("\n};\n")
 
-out.write("static const char* operandString[] = {\n");
+out.write("static const char* operandString[] = {\n")
 for i in xrange(0, len(operand_list)):
 	if i > 0:
 		out.write(",\n")
